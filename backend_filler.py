@@ -10,8 +10,10 @@ import os
 from utils import md2html
 
 class Filler:
-    def __init__(self,user_data_dir="/home/livin/.config/google-chrome/",profile_directory="Default") -> None:
+    def __init__(self,user_data_dir=None,profile_directory="Default") -> None:
         options = webdriver.ChromeOptions()
+        if not user_data_dir:
+            user_data_dir = f"/home/{os.getlogin()}/.config/google-chrome/"
         # Path To Custom Profile
         options.add_argument(f"user-data-dir={user_data_dir}")
         options.add_argument(f"profile-directory={profile_directory}")
@@ -178,6 +180,15 @@ class ProgAssignFiller(Filler):
         unit = self.driver.find_element(By.XPATH, xpath)
         urls = [
             unit.find_element(By.XPATH,f".//a[contains(text(), '{proq}')]").get_attribute("href") 
+            for proq in proqs
+        ]
+        return urls 
+
+    def get_all_proq_urls(self,unit_name):
+        xpath = f"//a[contains(text(), '{unit_name}')]/parent::*/parent::*/following-sibling::ol"
+        unit = self.driver.find_element(By.XPATH, xpath)
+        urls = [
+            unit.find_elements(By.XPATH,f".//a[contains(text(), '{proq}')]").get_attribute("href") 
             for proq in proqs
         ]
         return urls 
