@@ -1,5 +1,5 @@
 [project]
-name = "WebFillers"
+name = "web_fillers"
 version = "3.0.0"
 description = "Fillers for filling assignments in the seek portal and replit"
 readme = "README.md"
