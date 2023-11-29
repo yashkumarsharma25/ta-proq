@@ -1,6 +1,9 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+
 
 import json
 import os
@@ -18,11 +21,12 @@ class ProqFiller(Filler):
         
         
     def load_data(self,proq_file):
-        self.proqs = proq_to_json(proq_file)
-        for i, proq in self.proqs:
+        self.unit_name, self.proqs = proq_to_json(proq_file)
+        for i, proq in enumerate(self.proqs):
             self.proqs[i]["statement"] = md2html(proq["statement"])
         
-        
+    def open_dashboard():
+        ...
     def check_value(self,name, state=True):
         try:
             checkbox = self.driver.find_element(By.NAME, name)
@@ -52,11 +56,11 @@ class ProqFiller(Filler):
         self.click_link("Add Public Test Case", len(testcases["public_testcases"]))  
         self.click_link("Add Private Test Case", len(testcases["public_testcases"]))  
 
-        for i,t in testcases["public_testcases"]:
+        for i,t in enumerate(testcases["public_testcases"]):
             self.set_testcase_content(i,"input",True,t["input"])
             self.set_testcase_content(i,"output",True,t["output"])
 
-        for i,t in testcases["private_testcases"]:
+        for i,t in enumerate(testcases["private_testcases"]):
             self.set_testcase_content(i,"input",False,t["input"])
             self.set_testcase_content(i,"output",False,t["output"])
 
@@ -82,12 +86,19 @@ class ProqFiller(Filler):
             EC.presence_of_element_located((By.XPATH, '//*[@id="add_unit"]/button'))
         )
 
-    def add_unit(self):
+    def add_unit(self,unit_name):
         add_unit_btn = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.XPATH, '//*[@id="add_unit"]/button'))
         )
         add_unit_btn.click()
+        WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.LINK_TEXT, "Save"))
+        )
+        self.fill_input_by_name("title",unit_name)
         self.click_link("Save",wait=True)
+        WebDriverWait(self.driver, 10).until(
+            EC.text_to_be_present_in_element((By.XPATH, '//*[@id="gcb-butterbar-message"]'), 'Saved.')
+        )
         self.driver.back()
         self.driver.refresh()
 
@@ -96,18 +107,7 @@ class ProqFiller(Filler):
         WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.LINK_TEXT, "Save"))
             )
-    
-    def create_open_proq(self):
-        # wait till loaded
-        WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//ol[@class="course ui-sortable"]'))
-        )
-
-        last_unit = self.driver.find_element(By.XPATH,'//ol[@class="course ui-sortable"]/li[last()]')
-        add_proq_form = last_unit.find_element(By.XPATH,'.//form[@id="add_custom_unit_com.google.coursebuilder.programming_assignment"]')
-        add_proq_form.submit()
         
-        self.wait_till_proq_loaded()
         
 
     def get_proq_urls(self,unit_name, proqs):
@@ -135,16 +135,26 @@ class ProqFiller(Filler):
         )
 
     def fill_data(self,data):
+        while True:
+            try:
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.LINK_TEXT, "Save"))
+                )
+                break
+            except:
+                pass
+            
         self.fill_input_by_name("title", data["title"])
         self.set_problem_statement(data["statement"])
         
         # defaults
         self.select_value("content:evaluator", "nsjail")
-        self.select_value("workflow:evaluation_type", "Test Cases")
+        self.select_value("workflow:evaluation_type", "Test cases")
         self.check_value("html_check_answers", True)
         self.check_value("content:ignore_presentation_errors", True)
         self.check_value("content:show_sample_solution", True)
-
+        
+        self.select_value("content:allowed_languages[0]language",data["lang"])
         self.set_date_time(data["deadline"])
         self.set_testcases(data["testcases"])
         self.set_code_content(data["code"])
@@ -152,17 +162,31 @@ class ProqFiller(Filler):
         self.save_proq()
         
 
-    def create_proqs(self):
-        self.add_unit()
-        for proq in self.proqs:
-            self.create_open_proq()
+    def create_open_proqs(self):
+        # wait till loaded
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//ol[@class="course ui-sortable"]'))
+        )
+        last_unit = self.driver.find_element(By.XPATH,'//ol[@class="course ui-sortable"]/li[last()]')
+        button = last_unit.find_element(By.XPATH,'.//form[@id="add_custom_unit_com.google.coursebuilder.programming_assignment"]/button')
+        for i in range(len(self.proqs)):
+            ActionChains(self.driver) \
+                .key_down(Keys.CONTROL) \
+                .click(button) \
+                .key_up(Keys.CONTROL) \
+                .perform()
+        
+
+    def create_proqs(self,create_unit=True):
+        if create_unit:
+            self.add_unit(self.unit_name)
+        self.create_open_proqs()
+        for i,proq in enumerate(self.proqs,1):
+            self.driver.switch_to.window(self.driver.window_handles[i])
             try:
                 self.fill_data(proq)
-                self.driver.back()
-                self.driver.refresh()
             except:
                 print(f"problem in {proq['title']}")
-                input("Press enter to continue")
                 
 
 if __name__ == "__main__":

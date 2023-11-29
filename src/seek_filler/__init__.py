@@ -1,1 +1,1 @@
-from proq_filler import ProqFiller
+from .proq_filler import ProqFiller
