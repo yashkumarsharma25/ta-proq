@@ -115,7 +115,7 @@ class ProqFiller(Filler):
     def get_all_proq_urls(self,unit_name):
         xpath = f"//a[contains(text(), '{unit_name}')]/parent::*/parent::*/following-sibling::ol"
         unit = self.driver.find_element(By.XPATH, xpath)
-        urls = [unit.find_elements(By.XPATH,f".//a").get_attribute("href")]
+        urls = [element.get_attribute("href") for element in unit.find_elements(By.XPATH,f".//div[contains(@class, 'name')]/a")]
         return urls 
 
 
