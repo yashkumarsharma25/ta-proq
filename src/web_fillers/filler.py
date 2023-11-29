@@ -15,7 +15,7 @@ class Filler:
             if os.name == "posix": # linux
                 user_data_dir = f"/home/{os.getlogin()}/.config/google-chrome/"
             elif os.name == "nt": # windows
-                user_data_dir = f"C:\Users\{os.getlogin()}\AppData\Local\Google\Chrome\User Data"
+                user_data_dir = f"C:\\Users\\{os.getlogin()}\\AppData\\Local\\Google\\Chrome\\User Data"
         # Path To Custom Profile
         options.add_argument(f"user-data-dir={user_data_dir}")
         options.add_argument(f"profile-directory={profile_directory}")
