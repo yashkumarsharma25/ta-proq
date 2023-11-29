@@ -102,14 +102,7 @@ class ProqFiller(Filler):
         self.driver.back()
         self.driver.refresh()
 
-    def wait_till_proq_loaded(self):
-        # wait till the save buttion is available
-        WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.LINK_TEXT, "Save"))
-            )
         
-        
-
     def get_proq_urls(self,unit_name, proqs):
         xpath = f"//a[contains(text(), '{unit_name}')]/parent::*/parent::*/following-sibling::ol"
         unit = self.driver.find_element(By.XPATH, xpath)
@@ -125,6 +118,13 @@ class ProqFiller(Filler):
         urls = [unit.find_elements(By.XPATH,f".//a").get_attribute("href")]
         return urls 
 
+
+    def wait_till_proq_loaded(self,timeout):
+        # wait till the save buttion is available
+        WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_element_located((By.LINK_TEXT, "Save"))
+            )
+
     def save_proq(self):
         self.click_link("Save")
         WebDriverWait(self.driver, 10).until(
@@ -134,12 +134,14 @@ class ProqFiller(Filler):
     def fill_data(self,data):
         while True:
             try:
-                WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.LINK_TEXT, "Save"))
-                )
+                self.wait_till_proq_loaded(1)
                 break
             except:
-                pass
+                try:
+                    # for non secure sites.
+                    self.click_by_xpath_text("button","Continue to site", 1)
+                except:
+                    pass
             
         self.fill_input_by_name("title", data["title"])
         self.set_problem_statement(data["statement"])

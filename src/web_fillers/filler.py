@@ -72,8 +72,8 @@ class Filler:
         for _ in range(n):
             link.click()
     
-    def click_by_xpath_text(self,element, text):
-        elem = self.get_elem_by_xpath(f"//{element}[contains(.,'{text}')]")
+    def click_by_xpath_text(self,element, text,timeout=10):
+        elem = self.get_elem_by_xpath(f"//{element}[contains(.,'{text}')]",timeout=timeout)
         elem.click()
 
     def fill_text_area(self,name,content):

@@ -1,7 +1,7 @@
 import re 
 import bs4
 import subprocess
-from importlib.resources import open_text
+from importlib.resources import files
 
 def md2html(markdown, include_style=True):
     html = subprocess.run("pandoc --mathjax -f markdown-smart -M document-css=false",input=markdown,capture_output=True,text=True,shell=True).stdout
@@ -15,7 +15,7 @@ def md2html(markdown, include_style=True):
         new_tag['style'] = 'color:red;font-family:monospace'
         new_tag.string = element.text
         element.replace_with(new_tag)
-    soup_str = str(soup.find("head")) + str(soup.find("body"))
+    soup_str = str(soup)
     
 
     result=re.sub(r'<!--.*?-->','', soup_str,re.DOTALL)
@@ -29,7 +29,7 @@ def md2html(markdown, include_style=True):
     for pat, replace in math_mapping.items():
         result = re.sub(pat,replace,result)
     if include_style:
-        with open_text("style.css") as f:
+        with files("seek_filler").joinpath("style.css").open("r") as f:
             result = f"<style>{f.read()}</style>\n" + result
     return result
 
