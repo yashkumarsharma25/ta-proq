@@ -9,8 +9,6 @@ def md2html(markdown):
     for elem in soup.find_all(["style","title", "meta"]):
         elem.extract()
 
-    
-
     code_elements = soup.find_all('code', recursive=True)
     filtered_code_elements = [element for element in code_elements if element.find_parent('pre') is None]
     

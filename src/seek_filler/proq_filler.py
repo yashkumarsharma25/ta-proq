@@ -6,6 +6,7 @@ import json
 import os
 from web_fillers import Filler
 from .proq_to_json import proq_to_json
+from .utils import md2html
 
 class ProqFiller(Filler):
 
@@ -18,6 +19,8 @@ class ProqFiller(Filler):
         
     def load_data(self,proq_file):
         self.proqs = proq_to_json(proq_file)
+        for i, proq in self.proqs:
+            self.proqs[i]["statement"] = md2html(proq["statement"])
         
         
     def check_value(self,name, state=True):
