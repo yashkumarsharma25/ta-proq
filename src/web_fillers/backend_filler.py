@@ -54,18 +54,16 @@ class ProgAssignFiller(Filler):
             self.fill_text_area(name_attribute,content)
 
     def set_testcases(self,testcases):
-        n_public = len(list(filter(lambda x: x.get("isPublic"), testcases)))
-        n_private =len(testcases) - n_public
-        self.click_link("Add Public Test Case", n_public)  
-        self.click_link("Add Private Test Case", n_private)  
+        self.click_link("Add Public Test Case", len(testcases["public_testcases"]))  
+        self.click_link("Add Private Test Case", len(testcases["public_testcases"]))  
 
-        for i,t in enumerate(filter(lambda x: x["isPublic"], testcases)):
-            self.set_testcase_content(i,"input",t["isPublic"],t["input"])
-            self.set_testcase_content(i,"output",t["isPublic"],t["output"])
+        for i,t in testcases["public_testcases"]:
+            self.set_testcase_content(i,"input",True,t["input"])
+            self.set_testcase_content(i,"output",True,t["output"])
 
-        for i,t in enumerate(filter(lambda x: not x["isPublic"], testcases)):
-            self.set_testcase_content(i,"input",t["isPublic"],t["input"])
-            self.set_testcase_content(i,"output",t["isPublic"],t["output"])
+        for i,t in testcases["private_testcases"]:
+            self.set_testcase_content(i,"input",False,t["input"])
+            self.set_testcase_content(i,"output",False,t["output"])
 
     def set_code_content(self,template):
         
