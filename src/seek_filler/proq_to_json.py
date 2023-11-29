@@ -24,7 +24,7 @@ def extract_testcases(testcases_dict):
         })
     return testcases
 
-def proq_to_json(proq_file):
+def proq_to_json(proq_file, to_file=False):
     with open(proq_file) as f:
         raw_content = f.read()
         _,yaml_header , markdown = raw_content.split("---")
@@ -43,8 +43,10 @@ def proq_to_json(proq_file):
         problem["testcases"]["private_testcases"] = extract_testcases(problem["testcases"].pop("Private Test Cases"))
         dict().update(yaml_header)
     problems = list(problems.values())
-    with open(f"{unit_name}.json","w") as f:
-        json.dump(problems,f,indent=2)
+    if to_file:
+        with open(f"{unit_name}.json","w") as f:
+            json.dump(problems,f,indent=2)
+    return problems
 
 import sys
 import os

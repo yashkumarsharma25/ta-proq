@@ -4,9 +4,10 @@ from selenium.webdriver.support import expected_conditions as EC
 
 import json
 import os
-from .filler import Filler
+from web_fillers import Filler
+from .proq_to_json import proq_to_json
 
-class ProgAssignFiller(Filler):
+class ProqFiller(Filler):
 
     def from_cookie(self,url,cookies):
         self.driver.get(url)
@@ -15,18 +16,9 @@ class ProgAssignFiller(Filler):
         self.driver.get(url)
         
         
-    def load_data_file(self,data_file):
-        with open(data_file,"r") as f:
-            return json.load(f)
+    def load_data(self,proq_file):
+        self.proqs = proq_to_json(proq_file)
         
-    def load_data(self, data_path):
-        if os.path.isfile(data_path):
-            self.proqs = [self.load_data(data_path)]
-        if os.path.isdir(data_path):
-            self.proqs = [
-                self.load_data_file(os.path.join(data_path,data_file)) 
-                for data_file in os.listdir(data_path)
-            ]
         
     def check_value(self,name, state=True):
         try:
