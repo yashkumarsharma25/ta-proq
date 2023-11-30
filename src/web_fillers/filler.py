@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 
 import os
 
+
 class Filler:
     def __init__(self,user_data_dir=None,profile_directory="Default") -> None:
         options = webdriver.ChromeOptions()
@@ -21,6 +22,25 @@ class Filler:
         options.add_argument(f"profile-directory={profile_directory}")
         self.driver = webdriver.Chrome(options=options)
 
+    def open_url(self,url):
+        self.driver.get(url)
+
+    def open_url_in_new_tab(self,url):
+        self.driver.execute_script(f'window.open("{url}","_blank");')
+    
+    def goto_tab(self,i):
+        self.driver.switch_to.window(self.driver.window_handles[i])
+
+
+    def respond_alert(self, response, timeout=10):
+        WebDriverWait(self.driver, timeout).until(
+            EC.alert_is_present()
+        )
+        if response =="accept":
+            self.driver.switch_to.alert.accept()
+        elif response == "dismiss":
+            self.driver.switch_to.alert.dismiss()
+        
     def get_elem_by_xpath(self,xpath, timeout=10):
         return WebDriverWait(self.driver, timeout).until(
                 EC.presence_of_element_located((By.XPATH, xpath))
