@@ -1,17 +1,18 @@
 from markdown_to_json import dictify
 import yaml
-import bs4
 import json
+import re
 
 def extract_solution(solution):
     code = {}
-    soup = bs4.BeautifulSoup(solution,features="html.parser")
-    code["prefix"] = soup.find("prefix").text.strip("\n")
-    code["suffix"] = soup.find("suffix").text.strip("\n")
-    code["suffixInvisible"] = soup.find("suffix_invisible").text.strip("\n")
-    code["solution"] =  soup.find("template").text.strip("\n")
-    soup.find("solution").replace_with()
-    code["template"]  = soup.find("template").text.strip("\n")
+    
+    code_parts = ["prefix","suffix","suffix_invisible","solution","template"]
+    for part in code_parts:
+        code[part] = re.findall(f"<{part}>(.*)</{part}>",solution,re.MULTILINE|re.DOTALL )
+        code[part] = code[part][0].strip("\n") if code[part] else ""
+            
+    code["template"] = re.sub("<solution>(.*)</solution>","",code["template"],flags=re.MULTILINE|re.DOTALL )
+    print(code["template"])
     return code
 
 def extract_testcases(testcases_dict):
@@ -32,15 +33,15 @@ def proq_to_json(proq_file, to_file=False):
         yaml_header = yaml.safe_load(yaml_header)
     unit_name, problems = markdown_content.popitem()
     problem_names = list(problems.keys())
-
+    print(problem_names)
     for problem_name in problem_names:
         problem = problems[problem_name]
         problem["title"] = problem_name
         problem["statement"] = problem.pop("Problem Statement")
         problem["code"] = extract_solution(problem.pop("Solution"))
-        problem["testcases"] =problem.pop("Test Cases")
-        problem["testcases"]["public_testcases"] = extract_testcases(problem["testcases"].pop("Public Test Cases"))
-        problem["testcases"]["private_testcases"] = extract_testcases(problem["testcases"].pop("Private Test Cases"))
+        problem["testcases"] =problem.pop("Testcases")
+        problem["testcases"]["public_testcases"] = extract_testcases(problem["testcases"].pop("Public Testcases"))
+        problem["testcases"]["private_testcases"] = extract_testcases(problem["testcases"].pop("Private Testcases"))
         problem.update(yaml_header)
     problems = list(problems.values())
     if to_file:

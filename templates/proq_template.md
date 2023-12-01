@@ -53,9 +53,9 @@ if __name__ == "__main__":
 </suffix_invisible>
 ```
 
-### Test Cases
+### Testcases
 
-#### Public Test Cases
+#### Public Testcases
 
 ##### Input 1
 ```
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 27
 ```
 
-#### Private Test Cases
+#### Private Testcases
 
 ##### Input 1
 ```
@@ -106,9 +106,9 @@ if __name__ == "__main__":
 </suffix_invisible>
 ```
 
-### Test Cases
+### Testcases
 
-#### Public Test Cases
+#### Public Testcases
 
 ##### Input 1
 ```
@@ -119,7 +119,7 @@ if __name__ == "__main__":
 27
 ```
 
-#### Private Test Cases
+#### Private Testcases
 
 ##### Input 1
 ```

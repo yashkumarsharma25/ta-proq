@@ -70,7 +70,7 @@ class ProqFiller(Filler):
             "prefix": "content:allowed_languages[0]prefixed_code",
             "template": "content:allowed_languages[0]code_template",
             "suffix": "content:allowed_languages[0]uneditable_code",
-            "suffixInvisible": "content:allowed_languages[0]suffixed_invisible_code",
+            "suffix_invisible": "content:allowed_languages[0]suffixed_invisible_code",
             "solution": "content:allowed_languages[0]sample_solution"
         }
         for k in template.keys():
