@@ -16,6 +16,12 @@ show_sample_solution": true
 
 Sample problem statement containing inline math $x^2$ and some inline code `code` and some block math formulas:
 
+- sample list
+  - nested one
+  - another on
+- sample two
+    - lkjdsf
+
 $$
 \begin{align*}
     x^2+y^2 &= 3^2+5^2\\
@@ -24,11 +30,18 @@ $$
 \end{align*}
 $$
 
+Some sample code block
+```python
+printf("hello world")
+```
 And some Tables
 
 | Column 1 | Column 2 |
 | -------- | -------- |
 | entry 1  | entry 2  |
+
+- [ ] check 1
+- [x] checked
 
 ### Solution
 
