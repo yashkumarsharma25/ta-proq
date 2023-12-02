@@ -7,16 +7,40 @@ from selenium.webdriver.common.keys import Keys
 
 
 import os
-
+import json
 
 class Filler:
-    def __init__(self,user_data_dir=None,profile_directory="Default") -> None:
+    def __init__(self,login_id=None,profile_directory=None,user_data_dir=None) -> None:
         options = webdriver.ChromeOptions()
         if not user_data_dir:
             if os.name == "posix": # linux
                 user_data_dir = f"/home/{os.getlogin()}/.config/google-chrome/"
             elif os.name == "nt": # windows
                 user_data_dir = f"C:\\Users\\{os.getlogin()}\\AppData\\Local\\Google\\Chrome\\User Data"
+        
+        if not profile_directory:
+            with open(os.join(user_data_dir,"Local State")) as f:
+                content = json.load(f)
+            profiles = [
+                { 
+                    "profile":profile_name, 
+                    "name": data["shortcut_name"].split("(")[0].strip(), 
+                    "email": data["user_name"]
+                } 
+                for profile_name, data in content["profile"]["info_cache"].items()
+            ]
+            
+            if not login_id:
+                for i,profile in enumerate(profiles):
+                    print(f"{i+1}. {profile['name']}({profile['email']})")
+
+                profile_directory = profiles[int(input("Select a Profile"))-1]["profile"]
+            else:
+                for profile in profiles:
+                    if profile["email"] == login_id:
+                        profile_directory = profile["profile"]
+                        break
+
         # Path To Custom Profile
         options.add_argument(f"user-data-dir={user_data_dir}")
         options.add_argument(f"profile-directory={profile_directory}")
