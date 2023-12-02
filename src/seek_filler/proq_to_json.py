@@ -1,18 +1,25 @@
-from markdown_to_json import dictify
+from md2json import dictify
+from marko import Markdown
 import yaml
 import json
 import re
 
+def extract_codeblock_content(text):
+        return [
+            block 
+            for block in Markdown().parse(text).children 
+            if (block.get_type()=="FencedCode" or block.get_type()=="CodeBlock")
+        ][0].children[0].children
+
 def extract_solution(solution):
     code = {}
-    
+    solution = extract_codeblock_content(solution)
     code_parts = ["prefix","suffix","suffix_invisible","solution","template"]
     for part in code_parts:
-        code[part] = re.findall(f"<{part}>(.*)</{part}>",solution,re.MULTILINE|re.DOTALL )
+        code[part] = re.findall(f"<{re.escape(part)}>(.*?)</{re.escape(part)}>",solution,re.DOTALL )
         code[part] = code[part][0].strip("\n") if code[part] else ""
             
-    code["template"] = re.sub("<solution>(.*)</solution>","",code["template"],flags=re.MULTILINE|re.DOTALL )
-    print(code["template"])
+    code["template"] = re.sub("<solution>(.*)</solution>","",code["template"],flags=re.DOTALL )
     return code
 
 def extract_testcases(testcases_dict):
@@ -20,8 +27,8 @@ def extract_testcases(testcases_dict):
     testcases = []
     for input, output in zip(testcases_list[::2],testcases_list[1::2]):
         testcases.append({
-            "input":input.strip("\n").replace("```","").lstrip("\n"),
-            "output":output.strip("\n").replace("```","").lstrip("\n")
+            "input": extract_codeblock_content(input),
+            "output":extract_codeblock_content(output),
         })
     return testcases
 
@@ -33,7 +40,6 @@ def proq_to_json(proq_file, to_file=False):
         yaml_header = yaml.safe_load(yaml_header)
     unit_name, problems = markdown_content.popitem()
     problem_names = list(problems.keys())
-    print(problem_names)
     for problem_name in problem_names:
         problem = problems[problem_name]
         problem["title"] = problem_name
