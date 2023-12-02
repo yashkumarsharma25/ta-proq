@@ -18,6 +18,8 @@ dependencies = [
 
 [project.urls]
 [project.scripts]
+proq-template = "seek_filler.proq_gen:main"
+proq-create = "seek_filler.proq_create:main"
 [tool.setuptools]
 
 [build-system]
