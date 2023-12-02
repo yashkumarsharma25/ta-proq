@@ -9,7 +9,7 @@ import json
 import os
 from web_fillers import Filler
 from .proq_to_json import proq_to_json
-from .utils import md2html
+from .utils import md2seek
 
 class ProqFiller(Filler):
 
@@ -23,7 +23,7 @@ class ProqFiller(Filler):
     def load_data(self,proq_file):
         self.unit_name, self.proqs = proq_to_json(proq_file)
         for i, proq in enumerate(self.proqs):
-            self.proqs[i]["statement"] = md2html(proq["statement"])
+            self.proqs[i]["statement"] = md2seek(proq["statement"])
         
     def open_dashboard():
         ...

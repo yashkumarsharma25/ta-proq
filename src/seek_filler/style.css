@@ -55,3 +55,19 @@ ul.task-list li input[type="checkbox"] {
     margin: 0 0.8em 0.2em -1.6em;
     vertical-align: middle;
 }
+
+code {
+    color: red;
+    font-family: monospace;
+    background: #f8f8f8;
+    padding: .2rem;
+}
+
+pre {
+    background: #f8f8f8;
+    padding: 1rem;
+}
+
+pre code {
+    color: black;
+}

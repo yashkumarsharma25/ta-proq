@@ -2,32 +2,10 @@ import re
 import bs4
 import subprocess
 from importlib.resources import files
+from marko.ext.gfm import gfm
 
-def md2html(markdown, include_style=True):
-    html = subprocess.run("pandoc --mathjax -f markdown-smart -M document-css=false",input=markdown,capture_output=True,text=True,shell=True).stdout
-    soup = bs4.BeautifulSoup(html, 'html.parser')
-
-    code_elements = soup.find_all('code', recursive=True)
-    filtered_code_elements = [element for element in code_elements if element.find_parent('pre') is None]
-    
-    for element in filtered_code_elements:
-        new_tag = soup.new_tag('span')
-        new_tag['style'] = 'color:red;font-family:monospace'
-        new_tag.string = element.text
-        element.replace_with(new_tag)
-    soup_str = str(soup)
-    
-
-    result=re.sub(r'<!--.*?-->','', soup_str,re.DOTALL)
-    result = re.sub(r"\n+","\n",result)
-    math_mapping = {
-        r"\\\[":"<p><gcb-math>",
-        r"\\\]":"</gcb-math></p>",
-        r"\\\(":"<gcb-math>",
-        r"\\\)":"</gcb-math>",
-    }
-    for pat, replace in math_mapping.items():
-        result = re.sub(pat,replace,result)
+def md2seek(markdown, include_style=True):
+    result = gfm.convert(markdown)
     if include_style:
         with files("seek_filler").joinpath("style.css").open("r") as f:
             result = f"<style>{f.read()}</style>\n" + result
