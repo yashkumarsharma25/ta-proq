@@ -1,8 +1,9 @@
-import re 
+import re
 import bs4
 import subprocess
 from importlib.resources import files
 from marko.ext.gfm import gfm
+
 
 def md2seek(markdown, include_style=True):
     result = gfm.convert(markdown)
@@ -11,7 +12,8 @@ def md2seek(markdown, include_style=True):
             result = f"<style>{f.read()}</style>\n" + result
     return result
 
+
 def decomment(string):
-    string = re.sub("#.*","",string)
-    string = re.sub("\n[\n]+","\n\n",string,re.DOTALL)
+    string = re.sub("#.*", "", string)
+    string = re.sub("\n[\n]+", "\n\n", string, re.DOTALL)
     return string

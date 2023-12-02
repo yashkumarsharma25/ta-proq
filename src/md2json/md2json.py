@@ -1,8 +1,9 @@
 from marko import Markdown
 from marko.md_renderer import MarkdownRenderer
 
+
 def dictify(content):
-    '''Converts the markdown text to dictionaries based on heading outline.'''
+    """Converts the markdown text to dictionaries based on heading outline."""
 
     def nest_blocks(blocks, level):
         current_block = None
@@ -14,10 +15,12 @@ def dictify(content):
             elif current_block:
                 inner_blocks[current_block].append(block)
         if not current_block:
-            renderer= MarkdownRenderer()
+            renderer = MarkdownRenderer()
             return "".join(renderer.render(block) for block in blocks)
-        return {block_name: nest_blocks(children,level+1) for block_name,children in inner_blocks.items()}
+        return {
+            block_name: nest_blocks(children, level + 1)
+            for block_name, children in inner_blocks.items()
+        }
 
     document = Markdown().parse(content)
-    return nest_blocks(document.children,1)
-
+    return nest_blocks(document.children, 1)
