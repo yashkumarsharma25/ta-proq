@@ -11,13 +11,13 @@ def generate_template(output_file, num_problems, num_public, num_private, patter
             file.write(f"### Solution\n```\n\n```\n\n")
             file.write(f"### Testcases\n\n")
 
+            file.write(f"#### Public Testcases\n\n")
             for public_testcase_num in range(1, num_public + 1):
-                file.write(f"#### Public Testcase {public_testcase_num}\n\n")
                 file.write(f"##### Input {public_testcase_num}\n\n```\n\n```\n\n")
                 file.write(f"##### Output {public_testcase_num}\n\n```\n\n```\n\n")
 
+            file.write(f"#### Private Testcases\n\n")
             for private_testcase_num in range(1, num_private + 1):
-                file.write(f"#### Private Testcase {private_testcase_num}\n\n")
                 file.write(f"##### Input {private_testcase_num}\n\n```\n\n```\n\n")
                 file.write(f"##### Output {private_testcase_num}\n\n```\n\n```\n\n")
 
