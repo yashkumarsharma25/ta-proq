@@ -20,13 +20,14 @@ def extract_codeblock_content(text):
 def extract_solution(solution):
     code = {}
     solution = extract_codeblock_content(solution)
-    code_parts = ["prefix", "suffix", "suffix_invisible", "solution", "template"]
+    code_parts = ["prefix", "suffix", "suffix_invisible","template"]
     for part in code_parts:
         code[part] = re.findall(
             f"<{re.escape(part)}>(.*?)</{re.escape(part)}>", solution, re.DOTALL
         )
         code[part] = code[part][0].strip("\n") if code[part] else ""
-
+    code["solution"] = str(code["template"])
+    code["solution"] = re.sub(r'<\/?solution>',"",code["solution"])
     code["template"] = re.sub(
         "<solution>(.*)</solution>", "", code["template"], flags=re.DOTALL
     )

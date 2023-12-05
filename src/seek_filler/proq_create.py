@@ -3,14 +3,14 @@ from . import ProqFiller
 
 
 def create_proqs(
-    course_code, proq_file, domain="onlinedegree", use_existing_unit=False
+    course_code, proq_file, domain="onlinedegree", use_existing_unit=False, profile=None, login_id=None
 ):
-    filler = ProqFiller()
+    filler = ProqFiller(login_id,profile)
     filler.open_url(
         f"https://backend.seek.{domain}.iitm.ac.in/modules/firebase_auth/login?continue=https://backend.seek.{domain}.iitm.ac.in/{course_code}/dashboard"
     )
     filler.load_data(proq_file)
-    filler.create_proqs(create_unit=not new_unit)
+    filler.create_proqs(create_unit=not use_existing_unit)
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
     )
     parser.add_argument(
         "--use-existing-unit",
-        action="store_false",
+        action="store_true",
         help="Optional flag to use an existing unit",
         required=False,
     )

@@ -191,32 +191,20 @@ class ProqFiller(Filler):
 
     def create_proqs(self, create_unit=True):
         if create_unit:
+            print(f"Creating unit: {self.unit_name}")
             self.add_unit(self.unit_name)
-        self.create_open_proqs()
-        for i, proq in enumerate(self.proqs, 1):
-            self.driver.switch_to.window(self.driver.window_handles[i])
-            try:
-                self.fill_data(proq)
-            except:
-                print(f"{proq['title']} is not set correctly.")
-
-
-if __name__ == "__main__":
-    # Procedure
-    url = "https://backend.seek.onlinedegree.iitm.ac.in/22python_mock/dashboard"
-    # cookies = [{
-    #     'name': 'id_token',
-    #     'value': 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImFhMDhlN2M3ODNkYjhjOGFjNGNhNzJhZjdmOWRkN2JiMzk4ZjE2ZGMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiTGl2aW4gTmVjdG9yIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FBY0hUdGMwZE9pbjJ2YWd3Q1pnSjE1VEo2Y1FwS3YwMVVSU0NtOUEwWElXdzFRPXM5Ni1jIiwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL3NlZWstb2RlLXByb2QtYXV0aCIsImF1ZCI6InNlZWstb2RlLXByb2QtYXV0aCIsImF1dGhfdGltZSI6MTY5NDk0MDgxNCwidXNlcl9pZCI6Ikg0cnNZdzE2TWRTU1cwckRUWjZjajQ0ZXJXYTIiLCJzdWIiOiJINHJzWXcxNk1kU1NXMHJEVFo2Y2o0NGVyV2EyIiwiaWF0IjoxNjk0OTU0ODQxLCJleHAiOjE2OTQ5NTg0NDEsImVtYWlsIjoibGl2aW5Ac3R1ZHkuaWl0bS5hYy5pbiIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTEzMTEzNzQ1MzczNDY4MzY1NTMxIl0sImVtYWlsIjpbImxpdmluQHN0dWR5LmlpdG0uYWMuaW4iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJnb29nbGUuY29tIn19.ldPRBPM2yfXN43hFGusRRZ6zBGZ2WyTSBY3ped4FVIRpa0s2In-hX3cT9k7xaMb2FR1MZx9j1MUwcopFwmha4GV35sRCLuLJFX4qRmSRjsZSprLRKLC8mOXRh5D12qVl4NYJIQF5O_BndH_NBsNslNyJCgRiPp0eejrc1f75nbt4DofVkjALTuOrS_zY-dyOfNpUlUjZagw5tPwv6s8imTFtv6mEBqBY9n2jas0boUj26H0aVTu2gtgL8g8aOc6gINZx2X0Kc54pbXBMZjzXpmrYCBAWHUNXVSIJKMdT6peLr3qnB_3YqGNsXysPSEgmoWlQvo0qQHp449Mm_ywGfQ',
-    #     'domain': 'backend.seek.onlinedegree.iitm.ac.in',
-    #     'path': '/'
-    # }]
-
-    # filler = ProgAssignFiller("data.json",url,cookies)
-    # print("enter exit to exit.")
-    # while True:
-    #     a = input(">")
-    #     if a == "fill":
-    #         filler.fill_data()
-    #     elif a =="exit":
-    #         filler.driver.close()
-    #         break
+        else:
+            print("Adding the proqs to the last unit")
+        choice = input(f"{len(self.proqs)} proqs identified. Do you want to continue? (y/n)")
+        if choice.lower() == "y":
+            print("Creating the proqs.")
+            self.create_open_proqs()
+            for i, proq in enumerate(self.proqs, 1):
+                self.driver.switch_to.window(self.driver.window_handles[i])
+                try:
+                    print(f"setting {proq['title']}.")
+                    self.fill_data(proq)
+                except:
+                    print(f"{proq['title']} is not set correctly.")
+        else:
+            print("Quiting.")

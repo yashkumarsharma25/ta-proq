@@ -22,7 +22,7 @@ class Filler:
                 user_data_dir = f"C:\\Users\\{os.getlogin()}\\AppData\\Local\\Google\\Chrome\\User Data"
 
         if not profile_directory:
-            with open(os.join(user_data_dir, "Local State")) as f:
+            with open(os.path.join(user_data_dir, "Local State")) as f:
                 content = json.load(f)
             profiles = [
                 {
