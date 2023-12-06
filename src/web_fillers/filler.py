@@ -44,6 +44,7 @@ class Filler:
                 for profile in profiles:
                     if profile["email"] == login_id:
                         profile_directory = profile["profile"]
+                        print(f"The profile with the given email is {profile['profile']}")
                         break
 
         # Path To Custom Profile
