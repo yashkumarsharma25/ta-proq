@@ -61,6 +61,7 @@ code {
     font-family: monospace;
     background: #f8f8f8;
     padding: .2rem;
+
 }
 
 pre {
@@ -70,4 +71,5 @@ pre {
 
 pre code {
     color: black;
+    padding:0;
 }
