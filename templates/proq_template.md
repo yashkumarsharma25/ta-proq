@@ -1,4 +1,9 @@
 ---
+local_evaluate:
+    file_name: test.py
+    build: ""
+    run: python test.py
+
 lang : "Python3"
 # mm/dd/yyyy,HH:MM
 deadline : "09/28/2023,23:59"
@@ -32,7 +37,13 @@ $$
 
 Some sample code block
 ```python
-printf("hello world")
+def test():
+    for i in range(10):
+        print("hello world")
+    print("good bye")
+
+if __name__ == "__main__":
+    test()
 ```
 And some Tables
 
