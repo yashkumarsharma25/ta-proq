@@ -18,8 +18,11 @@ class Filler:
         if not user_data_dir:
             if os.name == "posix":  # linux
                 user_data_dir = f"/home/{os.getlogin()}/.config/google-chrome/"
+                name_key = "gaia_given_name"
             elif os.name == "nt":  # windows
                 user_data_dir = f"C:\\Users\\{os.getlogin()}\\AppData\\Local\\Google\\Chrome\\User Data"
+                name_key = "shortcut_name"
+
 
         if not profile_directory:
             with open(os.path.join(user_data_dir, "Local State")) as f:
@@ -27,7 +30,7 @@ class Filler:
             profiles = [
                 {
                     "profile": profile_name,
-                    "name": data["shortcut_name"].split("(")[0].strip(),
+                    "name": (data[name_key]).split("(")[0].strip(),
                     "email": data["user_name"],
                 }
                 for profile_name, data in content["profile"]["info_cache"].items()
@@ -141,4 +144,6 @@ class Filler:
         codeLine = codeMirror.find_elements(By.CLASS_NAME, "CodeMirror-lines")[0]
         codeLine.click()
         txtbx = codeMirror.find_element(By.CSS_SELECTOR, "textarea")
-        txtbx.send_keys(text)
+        for part in text.split('\n'):
+            txtbx.send_keys(part)
+            txtbx.send_keys(Keys.SHIFT + Keys.ENTER).perform()
