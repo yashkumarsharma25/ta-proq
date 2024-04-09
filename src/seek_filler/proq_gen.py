@@ -39,8 +39,9 @@ solution_content="""
 def generate_template(output_file, num_problems, num_public, num_private, pattern):
     with open(output_file, "w") as file:
         file.write(yaml_header_sample)        
+        file.write(f"\n# Unit Name\n\n")
+
         for problem_num in range(1, num_problems + 1):
-            file.write(f"# Unit Name\n\n")
             file.write(f"## {pattern.format(problem_num)}\n\n")
             file.write(f"### Problem Statement\n\n")
             file.write(f"### Solution{solution_content}\n")
