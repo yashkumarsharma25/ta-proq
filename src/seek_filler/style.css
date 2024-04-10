@@ -1,75 +1,78 @@
-table {
-    margin: 1em 0;
-    border-collapse: collapse;
-    width: 100%;
-    overflow-x: auto;
-    display: block;
-    font-variant-numeric: lining-nums tabular-nums;
+.prob-statement {
+    table {
+        margin: 1em 0;
+        border-collapse: collapse;
+        width: 100%;
+        overflow-x: auto;
+        display: block;
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    table caption {
+        margin-bottom: 0.75em;
+    }
+
+    tbody {
+        margin-top: 0.5em;
+        border-top: 1px solid #1a1a1a;
+        border-bottom: 1px solid #1a1a1a;
+    }
+
+    th,
+    td {
+        border: 1px solid #1a1a1a;
+        padding: 0.5em 0.5em 0.25em 0.5em;
+    }
+
+    code {
+        white-space: pre-wrap;
+    }
+
+    span.smallcaps {
+        font-variant: small-caps;
+    }
+
+    div.columns {
+        display: flex;
+        gap: min(4vw, 1.5em);
+    }
+
+    div.column {
+        flex: auto;
+        overflow-x: auto;
+    }
+
+    div.hanging-indent {
+        margin-left: 1.5em;
+        text-indent: -1.5em;
+    }
+
+    ul.task-list {
+        list-style: none;
+    }
+
+    ul.task-list li input[type="checkbox"] {
+        width: 0.8em;
+        margin: 0 0.8em 0.2em -1.6em;
+        vertical-align: middle;
+    }
 }
 
-table caption {
-    margin-bottom: 0.75em;
-}
 
-tbody {
-    margin-top: 0.5em;
-    border-top: 1px solid #1a1a1a;
-    border-bottom: 1px solid #1a1a1a;
-}
+.prob-statement {
+    line-height: 1.5;
 
-th,
-td {
-    border: 1px solid #1a1a1a;
-    padding: 0.5em 0.5em 0.25em 0.5em;
-}
+    pre code {
+        color: unset;
+        font-family: unset;
+        padding: unset;
+    }
+    code {
 
-code {
-    white-space: pre-wrap;
-}
+        color: red;
+        font-family: monospace;
+        padding: .2rem;
 
-span.smallcaps {
-    font-variant: small-caps;
-}
+    }
 
-div.columns {
-    display: flex;
-    gap: min(4vw, 1.5em);
-}
-
-div.column {
-    flex: auto;
-    overflow-x: auto;
-}
-
-div.hanging-indent {
-    margin-left: 1.5em;
-    text-indent: -1.5em;
-}
-
-ul.task-list {
-    list-style: none;
-}
-
-ul.task-list li input[type="checkbox"] {
-    width: 0.8em;
-    margin: 0 0.8em 0.2em -1.6em;
-    vertical-align: middle;
-}
-
-code {
-    color: red;
-    font-family: monospace;
-    background: #f8f8f8;
-    padding: .2rem;
-
-}
-
-pre {
-    background: #f8f8f8;
-    padding: 1rem;
-}
-
-pre code {
-    color: black;
-    padding:0;
 }

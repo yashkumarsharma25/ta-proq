@@ -29,7 +29,7 @@ def extract_solution(solution):
     code["solution"] = str(code["template"])
     code["solution"] = re.sub(r'<\/?solution>',"",code["solution"])
     code["template"] = re.sub(
-        "<solution>(.*)</solution>", "", code["template"], flags=re.DOTALL
+        "<solution>(.*?)</solution>", "", code["template"], flags=re.DOTALL
     )
     return code
 
@@ -83,6 +83,6 @@ if __name__ == "__main__":
     for f in files:
         try:
             assert os.path.isfile(f), f"{f} is not a valid file"
-            proq_to_json(f)
+            proq_to_json(f,to_file=True)
         except AssertionError as e:
             print(e)

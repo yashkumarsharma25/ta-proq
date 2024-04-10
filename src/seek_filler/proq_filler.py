@@ -199,6 +199,7 @@ class ProqFiller(Filler):
         if choice.lower() == "y":
             print("Creating the proqs.")
             self.create_open_proqs()
+            input("Press any key after all windows opened to continue.")
             for i, proq in enumerate(self.proqs, 1):
                 self.driver.switch_to.window(self.driver.window_handles[i])
                 try:
@@ -208,3 +209,4 @@ class ProqFiller(Filler):
                     print(f"{proq['title']} is not set correctly.")
         else:
             print("Quiting.")
+        self.driver.quit()

@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver import ActionChains
 
 
 import os
@@ -146,4 +147,5 @@ class Filler:
         txtbx = codeMirror.find_element(By.CSS_SELECTOR, "textarea")
         for part in text.split('\n'):
             txtbx.send_keys(part)
-            txtbx.send_keys(Keys.SHIFT + Keys.ENTER).perform()
+            ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.ENTER).key_up(Keys.SHIFT).key_up(Keys.ENTER).perform()
+                # txtbx.send_keys(Keys.SHIFT + Keys.ENTER).perform()
