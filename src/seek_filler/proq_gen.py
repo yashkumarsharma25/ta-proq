@@ -3,7 +3,7 @@ import argparse
 
 yaml_header_sample="""---
 local_evaluate:
-    file_name: test.py
+    source_file: test.py
     build: ""
     run: python test.py
 lang : "Python3"
