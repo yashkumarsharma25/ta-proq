@@ -27,7 +27,9 @@ def extract_solution(solution):
         )
         code[part] = code[part][0].strip("\n") if code[part] else ""
     code["solution"] = str(code["template"])
+    # in template remove sol and solution tag content and remove placeholder and ph tags
     code["solution"] = re.sub(r'<\/?solution>',"",code["solution"])
+    code["solution"] = re.sub("<solution>(.*?)</solution>", "", code["solution"], flags=re.DOTALL)
     code["template"] = re.sub(
         "<solution>(.*?)</solution>", "", code["template"], flags=re.DOTALL
     )
@@ -78,18 +80,16 @@ def proq_to_json(proq_file, to_file=False):
 import os
 import argparse
 
-def main():
-    parser = argparse.ArgumentParser(description="Convert Markdown file containing programming questions(proqs)  to JSON format.")
-    parser.add_argument("files", metavar="F", type=str, nargs="+", help="files to be processed")
 
-    args = parser.parse_args()
-
-    for f in args.files:
+# To html not implemented yet
+def proq_export(files):
+    for f in files:
         try:
             assert os.path.isfile(f), f"{f} is not a valid file"
             proq_to_json(f, to_file=True)
         except AssertionError as e:
             print(e)
 
-if __name__ == "__main__":
-    main()
+def conifgure_cli_parser(parser):
+    parser.add_argument("files", metavar="F", type=str, nargs="+", help="files to be exported")
+    parser.set_defaults(func=lambda args: proq_export(args.files))

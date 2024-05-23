@@ -12,9 +12,17 @@ def upload_proqs(
     filler.load_data(proq_file)
     filler.upload_proqs(create_unit=not use_existing_unit)
 
+def upload_proqs_interactive(
+    course_code=None, proq_file=None, domain="onlinedegree", use_existing_unit=False, profile=None, login_id=None
+):
+    if not course_code:
+        course_code = input("Enter course code: ")
+    if not proq_file:
+        proq_file = input("Enter problems file name: ")
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate a template for problems")
+    upload_proqs(course_code, proq_file, domain, use_existing_unit, profile, login_id)
+    
+def configure_cli_parser(parser):
     parser.add_argument(
         "--profile", type=str, help="Name of the Profile directory", required=False
     )
@@ -39,14 +47,14 @@ def main():
         help="Domain (nptel or onlinedegree)",
         required=False,
     )
-    args = parser.parse_args()
-    if not args.course_code:
-        args.course_code = input("Enter course code: ")
-    if not args.proq_file:
-        args.proq_file = input("Enter problems file name: ")
-
-    upload_proqs(**vars(args))
-
-
-if __name__ == "__main__":
-    main()
+    parser.set_defaults(
+        func = lambda args: upload_proqs(
+            args.course_code, 
+            args.proq_file, 
+            args.domain, 
+            args.use_existing_unit, 
+            args.profile, 
+            args.login_id
+        )
+    )
+    

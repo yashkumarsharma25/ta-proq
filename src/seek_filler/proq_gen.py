@@ -58,8 +58,7 @@ def generate_template(output_file, num_problems, num_public, num_private, patter
                 file.write(f"##### Output {private_testcase_num}\n\n```\n\n```\n\n")
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate a template for problems")
+def configure_cli_parser(parser):
     parser.add_argument(
         "-o",
         "--output-file",
@@ -83,10 +82,12 @@ def main():
     parser.add_argument(
         "--pattern", type=str, help="Problem numbering pattern", default="Problem {}"
     )
-
-    args = parser.parse_args()
-    generate_template(**vars(args))
-
-
-if __name__ == "__main__":
-    main()
+    parser.set_defaults(
+        func = lambda args: generate_template(
+            args.output_file,
+            args.num_problems,
+            args.num_public,
+            args.num_private,
+            args.pattern
+        )
+    )

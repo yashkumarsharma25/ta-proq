@@ -80,18 +80,16 @@ def evaluate_proq(proq_file):
 
 import os
 import argparse 
-def main():
-    parser = argparse.ArgumentParser(description="A CLI to evaluate proqs with the build and run configurations mentioned in the yaml header of proq_file.")
-    parser.add_argument("files", metavar="F", type=str, nargs="+", help="files to be processed")
 
-    args = parser.parse_args()
-
-    for file_path in args.files:
+def evaluate_proqs(files):
+    for file_path in files:
         if not os.path.isfile(file_path):
             print(f"{file_path} is not a valid file")
             continue
         print(f"Evaluating file {file_path}")
         evaluate_proq(file_path)
+
+def configure_cli_parser(parser):
+    parser.add_argument("files", metavar="F", type=str, nargs="+", help="proq files to be evaluated")
+    parser.set_defaults(func = lambda args: evaluate_proqs(args.files))
     
-if __name__ == "__main__":
-    main()

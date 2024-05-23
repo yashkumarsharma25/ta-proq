@@ -18,10 +18,8 @@ dependencies = [
 
 [project.urls]
 [project.scripts]
-proq-template = "seek_filler.proq_gen:main"
-proq-upload = "seek_filler.proq_upload:main"
-proq2json = "seek_filler.proq_to_json:main"
-proq-evaluate = "seek_filler.proq_evaluate:main"
+proq = "seek_filler.proq_cli:main"
+
 [tool.setuptools]
 
 [build-system]
