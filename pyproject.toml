@@ -18,7 +18,7 @@ dependencies = [
 
 [project.urls]
 [project.scripts]
-proq = "seek_filler.proq_cli:main"
+proq = "proq_filler.cli:main"
 
 [tool.setuptools]
 

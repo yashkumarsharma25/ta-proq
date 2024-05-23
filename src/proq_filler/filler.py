@@ -8,7 +8,7 @@ from selenium.webdriver.common.keys import Keys
 import json
 import os
 from web_fillers import Filler
-from .proq_to_json import proq_to_json
+from .export import proq_to_json
 from .utils import md2seek
 
 
