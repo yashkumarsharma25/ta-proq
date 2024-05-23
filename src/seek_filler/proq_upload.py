@@ -2,7 +2,7 @@ import argparse
 from . import ProqFiller
 
 
-def create_proqs(
+def upload_proqs(
     course_code, proq_file, domain="onlinedegree", use_existing_unit=False, profile=None, login_id=None
 ):
     filler = ProqFiller(login_id,profile)
@@ -10,7 +10,7 @@ def create_proqs(
         f"https://backend.seek.{domain}.iitm.ac.in/modules/firebase_auth/login?continue=https://backend.seek.{domain}.iitm.ac.in/{course_code}/dashboard"
     )
     filler.load_data(proq_file)
-    filler.create_proqs(create_unit=not use_existing_unit)
+    filler.upload_proqs(create_unit=not use_existing_unit)
 
 
 def main():
@@ -45,7 +45,7 @@ def main():
     if not args.proq_file:
         args.proq_file = input("Enter problems file name: ")
 
-    create_proqs(**vars(args))
+    upload_proqs(**vars(args))
 
 
 if __name__ == "__main__":

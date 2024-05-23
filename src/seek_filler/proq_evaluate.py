@@ -52,10 +52,8 @@ def check_testcases(run_command, testcases):
                     sep="\n"
                 )
 
-
-
-def main():
-    _, problems = proq_to_json(sys.argv[1])
+def evaluate_proq(proq_file):
+    _, problems = proq_to_json(proq_file)
 
     for problem in problems:
         script_file_name = problem["local_evaluate"]["source_file"]
@@ -79,6 +77,21 @@ def main():
         print("Private Testcases")
         check_testcases(run_command,problem["testcases"]["private_testcases"])
         print()
+
+import os
+import argparse 
+def main():
+    parser = argparse.ArgumentParser(description="A CLI to evaluate proqs with the build and run configurations mentioned in the yaml header of proq_file.")
+    parser.add_argument("files", metavar="F", type=str, nargs="+", help="files to be processed")
+
+    args = parser.parse_args()
+
+    for file_path in args.files:
+        if not os.path.isfile(file_path):
+            print(f"{file_path} is not a valid file")
+            continue
+        print(f"Evaluating file {file_path}")
+        evaluate_proq(file_path)
     
 if __name__ == "__main__":
     main()
