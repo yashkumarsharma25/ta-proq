@@ -72,17 +72,24 @@ def proq_to_json(proq_file, to_file=False):
     if to_file:
         with open(f"{unit_name}.json", "w") as f:
             json.dump(problems, f, indent=2)
+        print(f"Proqs dumped to {unit_name}.json")
     return unit_name, problems
 
-
-import sys
 import os
+import argparse
 
-if __name__ == "__main__":
-    files = sys.argv[1:]
-    for f in files:
+def main():
+    parser = argparse.ArgumentParser(description="Convert Markdown file containing programming questions(proqs)  to JSON format.")
+    parser.add_argument("files", metavar="F", type=str, nargs="+", help="files to be processed")
+
+    args = parser.parse_args()
+
+    for f in args.files:
         try:
             assert os.path.isfile(f), f"{f} is not a valid file"
-            proq_to_json(f,to_file=True)
+            proq_to_json(f, to_file=True)
         except AssertionError as e:
             print(e)
+
+if __name__ == "__main__":
+    main()
