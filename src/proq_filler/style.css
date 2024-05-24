@@ -60,9 +60,8 @@
 
 
 .prob-statement {
-    line-height: 1.5;
-
     pre code {
+        line-height: 1.5;
         color: unset;
         font-family: unset;
         padding: unset;
