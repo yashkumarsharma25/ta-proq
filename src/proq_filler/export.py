@@ -17,22 +17,45 @@ def extract_codeblock_content(text):
     )
 
 
+def get_tag_content(tag:str, html:str)->str:
+    """Get the inner html of first match of a tag.
+    Returns empty string if tag not found
+    """
+    content = re.findall(
+        f"<{re.escape(tag)}>(.*?)</{re.escape(tag)}>", html, re.DOTALL
+    )
+    content = content[0].strip("\n") if content else ""
+    return content
+
+def remove_all_matching_tags(tag, html):
+    return re.sub(
+        f"<{re.escape(tag)}>(.*?)</{re.escape(tag)}>", "", html, flags=re.DOTALL
+    )
+
+def strip_tags(html: str) -> str:
+    """Removes all tags from an HTML text."""
+    return re.sub(r'<\/?.*?>', "", html,flags=re.DOTALL)
+
+def clip_extra_lines(text:str)->str:
+    """
+    Reduces sequences of more than two consecutive line breaks 
+    to exactly two line breaks.
+    Also strip blank lines in the begining.
+    """
+    return re.sub(r'\n\s*\n', '\n\n', text,flags=re.DOTALL).lstrip()
+
 def extract_solution(solution):
     code = {}
     solution = extract_codeblock_content(solution)
     code_parts = ["prefix", "suffix", "suffix_invisible","template"]
     for part in code_parts:
-        code[part] = re.findall(
-            f"<{re.escape(part)}>(.*?)</{re.escape(part)}>", solution, re.DOTALL
-        )
-        code[part] = code[part][0].strip("\n") if code[part] else ""
+        code[part] = get_tag_content(part, solution)
     code["solution"] = str(code["template"])
-    # in template remove sol and solution tag content and remove placeholder and ph tags
-    code["solution"] = re.sub(r'<\/?solution>',"",code["solution"])
-    code["solution"] = re.sub("<solution>(.*?)</solution>", "", code["solution"], flags=re.DOTALL)
-    code["template"] = re.sub(
-        "<solution>(.*?)</solution>", "", code["template"], flags=re.DOTALL
-    )
+
+    for tag in ["solution","sol"]:
+        code["template"] = remove_all_matching_tags(tag, code["template"])
+    
+    code["solution"] = clip_extra_lines(strip_tags(code["solution"]))
     return code
 
 
