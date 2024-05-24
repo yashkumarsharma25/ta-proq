@@ -1,7 +1,7 @@
 [project]
-name = "web_fillers"
-version = "3.0.0"
-description = "Fillers for filling assignments in the seek portal and replit"
+name = "proq"
+version = "0.0.1"
+description = "A command-line based tool for authoring programming questions at scale."
 readme = "README.md"
 requires-python = ">=3.7"
 license = {file = "LICENSE.txt"}
@@ -11,7 +11,7 @@ authors = [
 ]
 
 dependencies = [
-  "selenium","markdown-to-json","pyyaml","bs4", "marko"
+  "selenium","markdown-to-json","pyyaml","bs4", "marko","Jinja2"
 ]
 
 [project.optional-dependencies]
