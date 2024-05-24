@@ -72,12 +72,19 @@ def extract_testcases(testcases_dict):
     return testcases
 
 
-def proq_to_json(proq_file, to_file=False):
-    with open(proq_file) as f:
-        raw_content = f.read()
-        _, yaml_header, markdown = raw_content.split("---", 2)
-        markdown_content = dictify(markdown)
-        yaml_header = yaml.safe_load(yaml_header)
+def proq_to_json(proq_file) -> tuple[str, dict]:
+    """Loads the proq file and returns a tuple (unit_name, proq_data)
+    """
+    from jinja2 import Environment, FileSystemLoader, select_autoescape
+    env = Environment(
+        loader=FileSystemLoader(os.path.abspath(os.path.dirname(proq_file))),
+        autoescape=select_autoescape()
+    )
+    template = env.get_template(os.path.basename(proq_file))
+    raw_content = template.render()
+    _, yaml_header, markdown = raw_content.split("---", 2)
+    markdown_content = dictify(markdown)
+    yaml_header = yaml.safe_load(yaml_header)
     unit_name, problems = markdown_content.popitem()
     problem_names = list(problems.keys())
     for problem_name in problem_names:
@@ -94,10 +101,6 @@ def proq_to_json(proq_file, to_file=False):
         )
         problem.update(yaml_header)
     problems = list(problems.values())
-    if to_file:
-        with open(f"{unit_name}.json", "w") as f:
-            json.dump(problems, f, indent=2)
-        print(f"Proqs dumped to {unit_name}.json")
     return unit_name, problems
 
 import os
@@ -105,14 +108,23 @@ import argparse
 
 
 # To html not implemented yet
-def proq_export(files):
-    for f in files:
-        try:
-            assert os.path.isfile(f), f"{f} is not a valid file"
-            proq_to_json(f, to_file=True)
-        except AssertionError as e:
-            print(e)
+def proq_export(proq_file,output_file=None,format="json"):
+    if not os.path.isfile(proq_file):
+        raise FileNotFoundError(f"{proq_file} is not a valid file")
+    
+    if not output_file:
+        assert format in ["json","html"], "Export format not valid. Supported formats are json and html."
+        output_file = ".".join(proq_file.split(".")[:-1])+f".{format}"
+        
+    unit_name, proq_data = proq_to_json(proq_file)
+    with open(output_file, "w") as f:
+        if format == "json":
+            json.dump(proq_data, f, indent=2)
+    print(f"Proqs dumped to {output_file}")
+    
 
-def conifgure_cli_parser(parser):
-    parser.add_argument("files", metavar="F", type=str, nargs="+", help="files to be exported")
-    parser.set_defaults(func=lambda args: proq_export(args.files))
+def conifgure_cli_parser(parser:argparse.ArgumentParser):
+    parser.add_argument("proq_file", metavar="F", type=str, help="proq file to be exported")
+    parser.add_argument("-o","--output-file",metavar="OUTPUT_FILE", required=False, type=str, help="name of the output file.")
+    parser.add_argument("-f","--format", metavar="OUTPUT_FORMAT", choices=['json', 'html'], default="json", help="format of the output file export")
+    parser.set_defaults(func=lambda args: proq_export(args.proq_file,args.output_file,))
