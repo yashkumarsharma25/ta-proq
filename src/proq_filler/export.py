@@ -16,6 +16,14 @@ def extract_codeblock_content(text):
         .children
     )
 
+def clip_extra_lines(text:str)->str:
+    """
+    Reduces sequences of more than two consecutive line breaks 
+    to exactly two line breaks.
+    Also strip blank lines in the begining.
+    """
+    return re.sub(r'\n\s*\n', '\n\n', text,flags=re.DOTALL).lstrip()
+
 
 def get_tag_content(tag:str, html:str)->str:
     """Get the inner html of first match of a tag.
@@ -24,7 +32,7 @@ def get_tag_content(tag:str, html:str)->str:
     content = re.findall(
         f"<{re.escape(tag)}>(.*?)</{re.escape(tag)}>", html, re.DOTALL
     )
-    content = content[0].strip("\n") if content else ""
+    content = clip_extra_lines(content[0]) if content else ""
     return content
 
 def remove_all_matching_tags(tag, html):
@@ -36,13 +44,6 @@ def strip_tags(html: str) -> str:
     """Removes all tags from an HTML text."""
     return re.sub(r'<\/?.*?>', "", html,flags=re.DOTALL)
 
-def clip_extra_lines(text:str)->str:
-    """
-    Reduces sequences of more than two consecutive line breaks 
-    to exactly two line breaks.
-    Also strip blank lines in the begining.
-    """
-    return re.sub(r'\n\s*\n', '\n\n', text,flags=re.DOTALL).lstrip()
 
 def extract_solution(solution):
     code = {}
