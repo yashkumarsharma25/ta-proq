@@ -120,6 +120,19 @@ def proq_export(proq_file,output_file=None,format="json"):
     with open(output_file, "w") as f:
         if format == "json":
             json.dump(proq_data, f, indent=2)
+        elif format == "html":
+            from jinja2 import Environment, PackageLoader, select_autoescape
+            env = Environment(
+                loader=PackageLoader("proq_filler", "templates"),
+                autoescape=select_autoescape()
+            )
+            template = env.get_template('proq_template.html.jinja')
+            for problem in proq_data:
+                from .utils import md2seek
+                problem["statement"] = md2seek(problem["statement"])
+            rendered_html = template.render(unit_name = unit_name,problems = proq_data)
+            with open(output_file,"w") as f:
+                f.write(rendered_html)
     print(f"Proqs dumped to {output_file}")
     
 
@@ -127,4 +140,4 @@ def conifgure_cli_parser(parser:argparse.ArgumentParser):
     parser.add_argument("proq_file", metavar="F", type=str, help="proq file to be exported")
     parser.add_argument("-o","--output-file",metavar="OUTPUT_FILE", required=False, type=str, help="name of the output file.")
     parser.add_argument("-f","--format", metavar="OUTPUT_FORMAT", choices=['json', 'html'], default="json", help="format of the output file export")
-    parser.set_defaults(func=lambda args: proq_export(args.proq_file,args.output_file,))
+    parser.set_defaults(func=lambda args: proq_export(args.proq_file,args.output_file,args.format))

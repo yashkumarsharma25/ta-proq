@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Problem Set</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        h1 {
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            padding: 5px;
+            border: 1px solid #ccc;
+            text-align: left;
+            width: 50%;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 5px;
+            margin: 0px;
+            border-radius: 5px;
+
+        }
+
+        .problem {
+            margin-bottom: 50px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+        integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
+        integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8"
+        crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05"
+        crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                    { left: '\(', right: '\)', display: false },
+                    { left: '\\[', right: '\]', display: true },
+                    { left: "\begin{equation}", right: "\end{equation}", display: true },
+                    { left: "\begin{align}", right: "\end{align}", display: true },
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+    {# <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/default.min.css"> #}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.0.0/polyfill.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    
+    <!-- and it's easy to individually load additional languages -->
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/python.min.js"></script>
+    
+    <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+
+    <h1>{{unit_name}}</h1>
+
+    {% for problem in problems %}
+    <div class="problem">
+        <h2>{{ problem.title }}</h2>
+        <p>{{ problem.statement }}</p>
+
+        <h3>Code Template</h3>
+        <pre><code>{{ problem.code.template }}</code></pre>
+
+        <h3>Solution</h3>
+        <pre><code>{{ problem.code.solution }}</code></pre>
+
+        <h3>Public Test Cases</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Input</th>
+                    <th>Expected Output</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for testcase in problem.testcases.public_testcases %}
+                <tr>
+                    <td>
+                        <pre>{{ testcase.input }}</pre>
+                    </td>
+                    <td>
+                        <pre>{{ testcase.output }}</pre>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Private Test Cases</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Input</th>
+                    <th>Expected Output</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for testcase in problem.testcases.private_testcases %}
+                <tr>
+                    <td>
+                        <pre>{{ testcase.input }}</pre>
+                    </td>
+                    <td>
+                        <pre>{{ testcase.output }}</pre>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+
+</body>
+
+</html>

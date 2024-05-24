@@ -61,7 +61,7 @@ def md2seek(markdown, include_style=True):
         )
         result = katex_include + result
     if include_style:
-        with files("seek_filler").joinpath("style.css").open("r") as f:
+        with files("proq_filler").joinpath("style.css").open("r") as f:
             result = f"<style>{f.read()}</style>\n" + result
     
     return result
