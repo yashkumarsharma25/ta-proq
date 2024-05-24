@@ -89,7 +89,7 @@ def evaluate_proqs(files):
         print(f"Evaluating file {file_path}")
         evaluate_proq(file_path)
 
-def configure_cli_parser(parser):
+def configure_cli_parser(parser:argparse.ArgumentParser):
     parser.add_argument("files", metavar="F", type=str, nargs="+", help="proq files to be evaluated")
     parser.set_defaults(func = lambda args: evaluate_proqs(args.files))
     

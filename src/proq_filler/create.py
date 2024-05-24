@@ -36,7 +36,11 @@ solution_content="""
 ```
 """
 
+import os
 def generate_template(output_file, num_problems, num_public, num_private, pattern):
+    if os.path.isfile(output_file):
+        raise FileExistsError("A file with the same name already exists.")
+    
     with open(output_file, "w") as file:
         file.write(yaml_header_sample)        
         file.write(f"\n# Unit Name\n\n")
@@ -58,7 +62,7 @@ def generate_template(output_file, num_problems, num_public, num_private, patter
                 file.write(f"##### Output {private_testcase_num}\n\n```\n\n```\n\n")
 
 
-def configure_cli_parser(parser):
+def configure_cli_parser(parser:argparse.ArgumentParser):
     parser.add_argument(
         "-o",
         "--output-file",

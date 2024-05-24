@@ -22,7 +22,7 @@ def upload_proqs_interactive(
 
     upload_proqs(course_code, proq_file, domain, use_existing_unit, profile, login_id)
     
-def configure_cli_parser(parser):
+def configure_cli_parser(parser:argparse.ArgumentParser):
     parser.add_argument(
         "--profile", type=str, help="Name of the Profile directory", required=False
     )
