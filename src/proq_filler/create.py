@@ -1,23 +1,46 @@
 #!/usr/bin/env python
 import argparse
 
-yaml_header_sample="""---
+sample_yaml_headers = {}
+sample_yaml_headers["python"]="""---
+lang: python
 local_evaluate:
     source_file: test.py
     build: ""
     run: python test.py
-lang : "Python3"
-# mm/dd/yyyy,HH:MM
-deadline : "09/28/2023,23:59"
-evaluator": "nsjail"
-ignore_presentation_error": true
-allow_compile": true
-show_sample_solution": true
+seek_config:
+    lang : Python3
+    deadline : 09/28/2023,23:59 # mm/dd/yyyy,HH:MM
+    evaluator": nsjail
+    evaluator_type: Test Cases
+    ignore_presentation_error": true
+    allow_compile": true
+    show_sample_solution": true
+    is_public: false
+---
+"""
+
+sample_yaml_headers["java"]="""---
+lang: java
+local_evaluate:
+    source_file: Test.java
+    build: javac Test.java
+    run: java Test.class
+seek_config:
+    lang : Java
+    deadline : 09/28/2023,23:59 # mm/dd/yyyy,HH:MM
+    evaluator": nsjail
+    evaluator_type: Test Cases
+    ignore_presentation_error": true
+    allow_compile": true
+    show_sample_solution": true
+    is_public: false
+    solution_file: Main.java
 ---
 """
 
 solution_content="""
-```
+```{}
 <prefix>
 
 </prefix>
@@ -37,18 +60,18 @@ solution_content="""
 """
 
 import os
-def generate_template(output_file, num_problems, num_public, num_private, pattern):
+def generate_template(output_file,lang,num_problems, num_public, num_private, pattern):
     if os.path.isfile(output_file):
         raise FileExistsError("A file with the same name already exists.")
     
     with open(output_file, "w") as file:
-        file.write(yaml_header_sample)        
+        file.write(sample_yaml_headers.get(lang,sample_yaml_headers["python"]))        
         file.write(f"\n# Unit Name\n\n")
 
         for problem_num in range(1, num_problems + 1):
             file.write(f"## {pattern.format(problem_num)}\n\n")
             file.write(f"### Problem Statement\n\n")
-            file.write(f"### Solution{solution_content}\n")
+            file.write(f"### Solution{solution_content.format(lang)}\n")
             file.write(f"### Testcases\n\n")
 
             file.write(f"#### Public Testcases\n\n")
@@ -71,6 +94,9 @@ def configure_cli_parser(parser:argparse.ArgumentParser):
         default="proq_template.md",
     )
     parser.add_argument(
+        "-l", "--lang", type=str, help="Language of the proq", default="python"
+    )
+    parser.add_argument(
         "-np", "--num-problems", type=int, help="Number of problems", default=5
     )
     parser.add_argument(
@@ -89,6 +115,7 @@ def configure_cli_parser(parser:argparse.ArgumentParser):
     parser.set_defaults(
         func = lambda args: generate_template(
             args.output_file,
+            args.lang,
             args.num_problems,
             args.num_public,
             args.num_private,
