@@ -14,13 +14,13 @@
 
     tbody {
         margin-top: 0.5em;
-        border-top: 1px solid #1a1a1a;
-        border-bottom: 1px solid #1a1a1a;
+        border-top: thin solid #000;
+        border-bottom: thin solid #000;
     }
 
     th,
     td {
-        border: 1px solid #1a1a1a;
+        border: thin solid #000;
         padding: 0.5em 0.5em 0.25em 0.5em;
     }
 
@@ -56,16 +56,14 @@
         margin: 0 0.8em 0.2em -1.6em;
         vertical-align: middle;
     }
-}
 
-
-.prob-statement {
     pre code {
         line-height: 1.5;
         color: unset;
         font-family: unset;
         padding: unset;
     }
+
     code {
 
         color: red;

@@ -2,6 +2,7 @@ from .parse import proq_to_json
 import json
 import os
 import argparse
+from marko.ext.gfm import gfm
 
 import asyncio
 from playwright.async_api import async_playwright
@@ -23,8 +24,7 @@ def get_rendered_html(unit_name, proq_data):
     )
     template = env.get_template('proq_template.html.jinja')
     for problem in proq_data:
-        from .utils import md2seek
-        problem["statement"] = md2seek(problem["statement"])
+        problem["statement"] = gfm.convert(problem["statement"])
     return template.render(unit_name = unit_name,problems = proq_data)
 
 def proq_export(proq_file,output_file=None,format="json"):

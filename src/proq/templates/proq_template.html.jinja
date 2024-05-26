@@ -22,14 +22,12 @@
 
         table {
             border-collapse: collapse;
-            width: 100%;
         }
 
         th,
         td {
             padding: 5px;
             border: 1px solid #ccc;
-            text-align: left;
         }
 
         pre {
@@ -38,17 +36,20 @@
                 border-radius: 5px;
                 border: thin solid #000;
                 padding: 3px;
+                text-wrap:wrap;
             }
 
             code.dim {
                 background: #f4f4f4;
             }
         }
+        @page {
+            size: A4; 
+            margin: .5in;
+        }
     </style>
     <style>
-        {
-            % include "./style.css" %
-        }
+        {% include "./style.css" %} 
     </style>
     {% include "./katex_includes.html" %}
     {% include "./highlightjs_includes.html" %}
