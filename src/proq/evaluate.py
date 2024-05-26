@@ -1,4 +1,4 @@
-from .export import proq_to_json
+from .parse import proq_to_json
 import sys 
 import subprocess
 
