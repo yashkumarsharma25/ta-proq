@@ -1,0 +1,69 @@
+{% if include_math %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css"
+    integrity="sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww" crossorigin="anonymous">
+{% endif %}
+
+{% if include_hjs %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css"
+    integrity="sha512-ZjzFgTdefwbr872DItYgMHB53Fz62tfzctEwMJJ05aDtyK1MUy61NXs57QFqVKOeJsn8BMvDMjRhhALXLDz1lw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endif %}
+
+{% if include_math or include_hjs %}
+
+<script>
+    function require(url, callback) {
+        var e = document.createElement("script");
+        e.src = url;
+        e.type = "text/javascript";
+        e.addEventListener('load', callback);
+        document.getElementsByTagName("head")[0].appendChild(e);
+    }
+    {% if include_hjs %}
+    require("https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js", function () {
+        hljs.highlightAll()
+    });
+    {% endif %}
+    {% if  %}
+    require("https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js")
+    require("https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js", function () {
+        let katexConfig = {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true },
+                { left: "\\begin{equation}", right: "\end{equation}", display: true },
+                { left: "\\begin{align}", right: "\end{align}", display: true },
+            ],
+            throwOnError: false
+        }
+        renderMathInElement(document.body, katexConfig);
+    }
+    )
+    {% endif %}
+</script>
+
+{% endif %}
+
+<style>
+    {% include "./style.css" %} 
+</style>
+
+<div class="prob-statement">
+
+{{proq["code"]["statement"]|gfm}}
+
+<details>
+    <summary> **Template Code(Click to Expand)** </summary>
+
+    ```python
+    {{proq["code"]["template"]}}
+    ```
+</details>
+
+</div>
+
+{% if proq["lang"] == "python" %}
+{% include "./python_tools.html" %}
+{% endif %}
