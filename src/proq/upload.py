@@ -1,16 +1,20 @@
 import argparse
-from . import ProqFiller
+import asyncio
+from .filler.seek_filler import SeekFiller
 
 
-def upload_proqs(
+async def upload_proqs(
     course_code, proq_file, domain="onlinedegree", use_existing_unit=False, profile=None, login_id=None
 ):
-    filler = ProqFiller(login_id,profile)
-    filler.open_url(
+    filler = SeekFiller()
+    await filler.init(login_id,profile)
+    filler.load_data(proq_file)
+    await filler.goto_course_dashboard("24t1_cs1002")
+    filler.page.goto(
         f"https://backend.seek.{domain}.iitm.ac.in/modules/firebase_auth/login?continue=https://backend.seek.{domain}.iitm.ac.in/{course_code}/dashboard"
     )
     filler.load_data(proq_file)
-    filler.upload_proqs(create_unit=not use_existing_unit)
+    await filler.create_proqs(create_unit=not use_existing_unit)
 
 def upload_proqs_interactive(
     course_code=None, proq_file=None, domain="onlinedegree", use_existing_unit=False, profile=None, login_id=None
@@ -20,7 +24,7 @@ def upload_proqs_interactive(
     if not proq_file:
         proq_file = input("Enter problems file name: ")
 
-    upload_proqs(course_code, proq_file, domain, use_existing_unit, profile, login_id)
+    asyncio.run(upload_proqs(course_code, proq_file, domain, use_existing_unit, profile, login_id))
     
 def configure_cli_parser(parser:argparse.ArgumentParser):
     parser.add_argument(
@@ -48,7 +52,7 @@ def configure_cli_parser(parser:argparse.ArgumentParser):
         required=False,
     )
     parser.set_defaults(
-        func = lambda args: upload_proqs(
+        func = lambda args: upload_proqs_interactive(
             args.course_code, 
             args.proq_file, 
             args.domain, 

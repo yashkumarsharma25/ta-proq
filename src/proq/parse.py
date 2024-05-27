@@ -76,6 +76,10 @@ def extract_testcases(testcases_dict):
         )
     return testcases
 
+dirty_white_space_pattern = re.compile(r"\s+")
+def clean_white_space(word):
+    return re.sub(dirty_white_space_pattern, " ",word)
+
 
 def proq_to_json(proq_file) -> tuple[str, dict]:
     """Loads the proq file and returns a tuple (unit_name, proq_data)
@@ -91,10 +95,11 @@ def proq_to_json(proq_file) -> tuple[str, dict]:
     markdown_content = dictify(markdown)
     yaml_header = yaml.safe_load(yaml_header)
     unit_name, problems = markdown_content.popitem()
+    unit_name = clean_white_space(unit_name)
     problem_names = list(problems.keys())
     for problem_name in problem_names:
         problem = problems[problem_name]
-        problem["title"] = problem_name
+        problem["title"] = clean_white_space(problem_name)
         problem["statement"] = problem.pop("Problem Statement")
         problem["code"] = extract_solution(problem.pop("Solution"))
         problem["testcases"] = problem.pop("Testcases")

@@ -1,14 +1,12 @@
 {% if include_math %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css"
-    integrity="sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
 {% endif %}
 
 {% if include_hjs %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css"
-    integrity="sha512-ZjzFgTdefwbr872DItYgMHB53Fz62tfzctEwMJJ05aDtyK1MUy61NXs57QFqVKOeJsn8BMvDMjRhhALXLDz1lw=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    crossorigin="anonymous" referrerpolicy="no-referrer">
 {% endif %}
-
+ q  
 {% if include_math or include_hjs %}
 
 <script>
@@ -43,7 +41,7 @@
     }
     )
     {% endif %}
-    
+
 </script>
 
 {% endif %}
@@ -56,8 +54,8 @@
 
 {{proq["statement"]|gfm}}
 
-<details>
-    <summary> **Template Code(Click to Expand)** </summary>
+<details style="padding:2rem 0;">
+    <summary> <strong>Template Code(Click to Expand)</strong> </summary>
 
     <pre><code class="lang-{{proq.lang}}">{{proq.code.template}}</code></pre>
 
