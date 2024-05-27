@@ -24,7 +24,8 @@
         hljs.highlightAll()
     });
     {% endif %}
-    {% if  %}
+
+    {% if include_math %}
     require("https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js")
     require("https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js", function () {
         let katexConfig = {
@@ -42,6 +43,7 @@
     }
     )
     {% endif %}
+    
 </script>
 
 {% endif %}
@@ -52,14 +54,13 @@
 
 <div class="prob-statement">
 
-{{proq["code"]["statement"]|gfm}}
+{{proq["statement"]|gfm}}
 
 <details>
     <summary> **Template Code(Click to Expand)** </summary>
 
-    ```python
-    {{proq["code"]["template"]}}
-    ```
+    <pre><code class="lang-{{proq.lang}}">{{proq.code.template}}</code></pre>
+
 </details>
 
 </div>

@@ -56,9 +56,10 @@
         margin: 0 0.8em 0.2em -1.6em;
         vertical-align: middle;
     }
-
-    pre code {
+    pre {
         line-height: 1.5;
+    }
+    pre code {
         color: unset;
         font-family: unset;
         padding: unset;
