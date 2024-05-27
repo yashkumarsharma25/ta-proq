@@ -12,7 +12,7 @@ seek_config:
     lang : Python3
     deadline : 09/28/2023,23:59 # mm/dd/yyyy,HH:MM
     evaluator": nsjail
-    evaluator_type: Test Cases
+    evaluator_type: test_cases
     ignore_presentation_error": true
     allow_compile": true
     show_sample_solution": true
@@ -30,7 +30,7 @@ seek_config:
     lang : Java
     deadline : 09/28/2023,23:59 # mm/dd/yyyy,HH:MM
     evaluator": nsjail
-    evaluator_type: Test Cases
+    evaluator_type: test_cases
     ignore_presentation_error": true
     allow_compile": true
     show_sample_solution": true
