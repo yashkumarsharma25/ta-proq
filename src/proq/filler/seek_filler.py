@@ -52,11 +52,12 @@ class SeekFiller(Filler):
     async def set_problem_statement(self, page, statement):
         # click html code button
         await page.locator("button:text('code')").click()
-        # click inside code mirror
-        await page.locator(".CodeMirror-lines").click()
+        text_area = page.locator(".CodeMirror textarea")
+        # delete existing problem statement
+        await text_area.press("Control+a")
+        await text_area.press("Delete")
         # enter problem statement
-        await page.locator(".CodeMirror textarea")\
-            .fill(statement)
+        await text_area.fill(statement)
 
     async def check_value(self,page, name,value =True):
         check_box = page.locator(f'[name="{name}"]').locator("xpath=./preceding-sibling::input[@type='checkbox']")
