@@ -20,9 +20,9 @@ def clip_extra_lines(text:str)->str:
     """
     Reduces sequences of more than two consecutive line breaks 
     to exactly two line breaks.
-    Also strip blank lines in the begining.
+    Also strip blank lines in the begining and end.
     """
-    return re.sub(r'\n\s*\n', '\n\n', text,flags=re.DOTALL)
+    return re.sub(r'\n\s*\n', '\n\n', text,flags=re.DOTALL).lstrip("\n").rstrip()
 
 
 
@@ -60,7 +60,14 @@ def extract_solution(solution):
     for tag in ["solution","sol"]:
         code["template"] = remove_all_matching_tags(tag, code["template"])
     
-    code["solution"] = clip_extra_lines(strip_tags(code["solution"]))
+    # opposite of sol will be in template but removed from solution 
+    for tag in ["los"]: 
+        code["solution"] = remove_all_matching_tags(tag, code["solution"])
+    
+    code["prefix"] = clip_extra_lines(code["prefix"])+"\n"
+    code["solution"] = clip_extra_lines(strip_tags(code["solution"]))+"\n"
+    code["suffix"] = clip_extra_lines(code["suffix"])+"\n"
+    
     return code
 
 
