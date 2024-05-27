@@ -52,6 +52,9 @@ def extract_solution(solution):
     code_parts = ["prefix", "suffix", "suffix_invisible","template"]
     for part in code_parts:
         code[part] = get_tag_content(part, solution)
+        # remove if only white space 
+        if code[part].strip() == "": 
+            code[part] = ""
     code["solution"] = str(code["template"])
 
     for tag in ["solution","sol"]:
