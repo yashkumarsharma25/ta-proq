@@ -36,7 +36,7 @@
                 border-radius: 5px;
                 border: thin solid #000;
                 padding: 3px;
-                text-wrap:wrap;
+                text-wrap: wrap;
             }
 
             code.dim {
@@ -67,11 +67,11 @@
             {{ problem.statement }}
         </div>
         <div style="display: flex; flex-direction: row; flex-wrap:wrap; gap: 20px;">
-            <div style="flex: 1;">
+            <div style="flex: content;">
                 <h3>Code Template</h3>
                 <pre class="solution">{%if problem.code.prefix.strip() %}<code class="dim lang-{{problem.lang}}">{{problem.code.prefix}}</code>{% endif %}<code class="lang-{{problem.lang}}">{{ problem.code.template }}</code>{%if problem.code.suffix.strip() %}<code class="dim lang-{{problem.lang}}">{{problem.code.suffix}}</code>{% endif%}</pre>
             </div>
-            <div style="flex: 1;">
+            <div style="flex: content;">
                 <h3>Solution</h3>
                 <pre
                     class="solution">{%if problem.code.prefix.strip() %}<code class="dim lang-{{problem.lang}}">{{problem.code.prefix}}</code>{% endif %}<code class="lang-{{problem.lang}}">{{ problem.code.solution }}</code>{%if problem.code.suffix.strip() %}<code class="dim lang-{{problem.lang}}">{{problem.code.suffix}}</code>{% endif%}</pre>
