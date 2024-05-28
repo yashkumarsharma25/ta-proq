@@ -3,7 +3,7 @@ import json
 from playwright.async_api import async_playwright
 
 class Filler:
-    async def init(self, login_id=None, profile_directory=None, user_data_dir=None):
+    async def init(self, headless=False, login_id=None, profile_directory=None, user_data_dir=None):
         self.playwright = await async_playwright().start()
         self.browser = self.playwright.chromium
     
@@ -44,9 +44,13 @@ class Filler:
         self.context = await self.browser.launch_persistent_context(
             user_data_dir,
             channel="chrome",
-            headless=False,
-            args=[f"--profile-directory={profile_directory}","--start-maximized"],
-            no_viewport=True
+            headless=headless,
+            args=[
+                f"--profile-directory={profile_directory}",
+                "--start-maximized",
+                "--disable-web-security"
+            ],
+            no_viewport=True,
         )
         self.page = self.context.pages[0]
 

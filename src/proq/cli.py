@@ -22,7 +22,7 @@ def main():
     parser_export = subparsers.add_parser('export', help='Export to JSON or HTML')
     export.conifgure_cli_parser(parser_export)
 
-    parser_upload = subparsers.add_parser('upload', help='Upload proq using selenium using chrome')
+    parser_upload = subparsers.add_parser('upload', help='Upload proq using playwright using chrome')
     upload.configure_cli_parser(parser_upload)
 
     # Parse the arguments

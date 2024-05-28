@@ -6,6 +6,8 @@ import asyncio
 
 
 class SeekFiller(Filler):
+    backend_link_format = "https://backend.seek.{domain}.iitm.ac.in/modules/firebase_auth/login?continue=https://backend.seek.{domain}.iitm.ac.in/{course_code}/dashboard"
+
     def load_data(self, proq_file):
         self.unit_name, self.proqs = proq_to_json(proq_file)
         for proq in self.proqs:
@@ -17,16 +19,9 @@ class SeekFiller(Filler):
         )
         await self.page.wait_for_url(f"https://backend.seek.{domain}.iitm.ac.in/{course_code}/dashboard")
 
-    async def continue_blocked_page(self,page):
-        try:
-            await page.wait_for_load_state("domcontentloaded",timeout=20000)
-            await page.get_by_text("Continue to site").dispatch_event("click",timeout=3000)
-        except Exception as e:
-            print(e)
 
     async def add_unit(self, unit_name):
         await self.page.locator('#add_unit > button').click()
-        await self.continue_blocked_page(self.page)
         await self.page.locator("[name='title']").fill(unit_name)
         await self.page.get_by_role("link",name="Save").click()
         await expect(self.page.get_by_text("Saved.")).to_be_visible()
@@ -152,7 +147,12 @@ class SeekFiller(Filler):
         await self.set_testcases(page, data["testcases"])
         await self.set_code_content(page, data["code"])
 
-        return await self.save_proq(page)
+        ok_status = await self.save_proq(page)
+        if ok_status:
+            print(f"Proq: {data["title"]}, status: Saved successfully")
+        else:
+            print(f"Proq: {data["title"]}, status: Failed to save")
+        return ok_status
 
     async def get_proq_urls(self, unit_name, proqs):
         xpath = f"//a[contains(text(), '{unit_name}')]/parent::*/parent::*/following-sibling::ol"
@@ -173,9 +173,16 @@ class SeekFiller(Filler):
         return urls
 
     async def create_proqs_in_unit(self, unit_name):
-        # TODO: implement create unit if not exists
-        unit = self.page.locator("ol.course.ui-sortable>li",has_text=unit_name).locator("ol.unit.ui-sortable")
+        await self.page.wait_for_load_state("domcontentloaded")
+        try:
+            unit = self.page.locator("ol.course.ui-sortable>li",has_text=unit_name).locator("ol.unit.ui-sortable")
+            await expect(unit).to_be_attached(timeout=1000)
+        except:
+            await self.add_unit(unit_name)
+            unit = self.page.locator("ol.course.ui-sortable>li",has_text=unit_name).locator("ol.unit.ui-sortable")
+
         proq_links = await unit.get_by_role("link").filter(has_not_text="open_in_new").all()
+            
         proq_links = {
             (await proq_link.inner_text()).strip() : proq_link
             for proq_link in proq_links
@@ -184,36 +191,44 @@ class SeekFiller(Filler):
         new_proq_button = unit.locator(
             'form#add_custom_unit_com\\.google\\.coursebuilder\\.programming_assignment > button'
         )
-
+        
+        tasks = []
         for proq in self.proqs:
             element = proq_links.get(proq["title"].strip(), new_proq_button)
-            await element.click(modifiers=["ControlOrMeta"])
-
-        while len(self.context.pages) != len(self.proqs)+1:
-            await asyncio.sleep(1)
-
-        for page in self.context.pages[1:]:
-            await self.continue_blocked_page(page)
-
-
-        statuses = await asyncio.gather(*(
-            self.fill_data(proq,page) 
-            for proq, page in zip(self.proqs, self.context.pages[1:])
-        ))
+            async with self.context.expect_page() as new_page_info:
+                await element.click(modifiers=["ControlOrMeta"])                
+            tasks.append(asyncio.create_task(self.fill_data(proq,await new_page_info.value)))
+        
+        statuses = await asyncio.gather(*tasks)
         return {proq["title"]: status for proq, status in zip(self.proqs, statuses)}
 
 
-    async def create_proqs(self, create_unit=True):
+    async def upload_proqs(self, proq_file, course_code, proqs=None, headless=True, login_id=None, profile=None, domain="onlinedegree"):
+        if not proq_file:
+            proq_file = input("Enter problems file name: ")
+
+        self.load_data(proq_file)
         print(f"Unit Name: {self.unit_name}")
         print("Below proqs are identified.")
         print(*(f"{i}. {proq['title']}" for i, proq in enumerate(self.proqs,1)),sep="\n")
+        if proqs:
+            proqs = list(map(int,proqs))
+            self.proqs = [proq for i, proq in enumerate(self.proqs,1) if i in proqs]
+        print("Below proqs are selected for update.")
+        print(*(f"{i}. {proq['title']}" for i, proq in enumerate(self.proqs,1)),sep="\n")                
         choice = input("Do you want to continue? (y/n)")
-        if choice.lower() == "y":
-            print(f"Creating the proqs in {self.unit_name}")
-            statuses = await self.create_proqs_in_unit(self.unit_name)
-            for title ,status in statuses.items():
-                print(title,"Success" if status else "Failed")
-        else:
-            print("Quiting.")
+        if choice.lower()!='y':
+            print("Exiting.")
+            return 
+        
+        if not course_code:
+            course_code = input("Enter course code: ")
+
+        await self.init(headless=headless,login_id=login_id,profile_directory=profile)
+        await self.goto_course_dashboard(course_code)
+
+        print(f"Creating the proqs in {self.unit_name}")
+        await self.create_proqs_in_unit(self.unit_name)
+        
         await self.context.close()
         await self.playwright.stop()
