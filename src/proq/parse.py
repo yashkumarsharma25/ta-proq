@@ -88,16 +88,25 @@ dirty_white_space_pattern = re.compile(r"\s+")
 def clean_white_space(word):
     return re.sub(dirty_white_space_pattern, " ",word)
 
+def load_relative_to(file_name):
+    def inner(template):
+        dir = os.path.dirname(file_name)
+        path = os.path.abspath(os.path.join(dir,template))
+        with open(path) as f:
+            return f.read()
+    return inner
 
 def proq_to_json(proq_file) -> tuple[str, dict]:
     """Loads the proq file and returns a tuple (unit_name, proq_data)
     """
-    from jinja2 import Environment, FileSystemLoader, select_autoescape
+    from jinja2 import Environment,FunctionLoader, select_autoescape
+
     env = Environment(
-        loader=FileSystemLoader(os.path.abspath(os.path.dirname(proq_file))),
+        loader=FunctionLoader(load_relative_to(proq_file)),
         autoescape=select_autoescape()
     )
     template = env.get_template(os.path.basename(proq_file))
+    
     raw_content = template.render()
     _, yaml_header, markdown = raw_content.split("---", 2)
     markdown_content = dictify(markdown)
