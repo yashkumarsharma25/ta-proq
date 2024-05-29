@@ -11,11 +11,11 @@ local_evaluate:
 seek_config:
     lang : Python3
     deadline : 09/28/2023,23:59 # mm/dd/yyyy,HH:MM
-    evaluator": nsjail
+    evaluator : nsjail
     evaluator_type: test_cases
-    ignore_presentation_error": true
-    allow_compile": true
-    show_sample_solution": true
+    ignore_presentation_error : true
+    allow_compile : true
+    show_sample_solution : true
     is_public: false
 ---
 """
@@ -29,11 +29,11 @@ local_evaluate:
 seek_config:
     lang : Java
     deadline : 09/28/2023,23:59 # mm/dd/yyyy,HH:MM
-    evaluator": nsjail
-    evaluator_type: test_cases
-    ignore_presentation_error": true
-    allow_compile": true
-    show_sample_solution": true
+    evaluator : nsjail
+    evaluator_type : test_cases
+    ignore_presentation_error : true
+    allow_compile : true
+    show_sample_solution : true
     is_public: false
     solution_file: Main.java
 ---
