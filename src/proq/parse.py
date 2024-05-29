@@ -41,9 +41,9 @@ def remove_all_matching_tags(tag, html):
         f"<{re.escape(tag)}>(.*?)</{re.escape(tag)}>", "", html, flags=re.DOTALL
     )
 
-def strip_tags(html: str) -> str:
+def strip_tags(html: str,tags: list[str]) -> str:
     """Removes all tags from an HTML text."""
-    return re.sub(r'<\/?.*?>', "", html,flags=re.DOTALL)
+    return re.sub(r'<\/?({tags}).*?>'.format(tags="|".join(tags)), "", html,flags=re.DOTALL)
 
 
 def extract_solution(solution):
@@ -65,8 +65,8 @@ def extract_solution(solution):
         code["solution"] = remove_all_matching_tags(tag, code["solution"])
     
     code["prefix"] = clip_extra_lines(code["prefix"])+"\n"
-    code["solution"] = clip_extra_lines(strip_tags(code["solution"]))+"\n"
-    code["template"] = clip_extra_lines(strip_tags(code["template"]))+"\n"
+    code["solution"] = clip_extra_lines(strip_tags(code["solution"],["sol","solution"]))+"\n"
+    code["template"] = clip_extra_lines(strip_tags(code["template"],["los"]))+"\n"
     code["suffix"] = clip_extra_lines(code["suffix"])+"\n"
     
     return code
