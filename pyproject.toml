@@ -24,6 +24,3 @@ proq = "proq.cli:main"
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools.data-files]
-proq = ["template/*"]
