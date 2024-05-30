@@ -92,7 +92,7 @@ class SeekFiller(Filler):
         for i in range(len(testcases["private_testcases"])):
             await page.get_by_text("Add Private Test Case").click()
 
-        for i, t in enumerate(testcases["private_testcases"]):            
+        for i, t in enumerate(testcases["public_testcases"]):            
             await self.set_testcase_content(page, i, "input", True, t["input"]),
             await self.set_testcase_content(page, i, "output", True, t["output"])
 
