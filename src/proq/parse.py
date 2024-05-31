@@ -68,6 +68,9 @@ def extract_solution(solution):
     code["solution"] = clip_extra_lines(strip_tags(code["solution"],["sol","solution"]))+"\n"
     code["template"] = clip_extra_lines(strip_tags(code["template"],["los"]))+"\n"
     code["suffix"] = clip_extra_lines(code["suffix"])+"\n"
+
+    code["prefix"] =  code["prefix"] if code["prefix"].strip() else ""
+    code["suffix"] =  code["suffix"] if code["suffix"].strip() else ""
     
     return code
 
