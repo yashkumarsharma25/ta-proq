@@ -8,10 +8,10 @@ from . import upload
 
 def main():
     # Create the main parser
-    parser = argparse.ArgumentParser(prog='proq', description='Process some queries.')
+    parser = argparse.ArgumentParser(prog='proq', description='A Command-line suite for authoring Programming Questions')
 
     # Create the subparsers
-    subparsers = parser.add_subparsers(title='subcommands', description='valid subcommands', help='additional help', dest='command')
+    subparsers = parser.add_subparsers(title='\033[1mCommands\033[0m', dest='command', metavar="COMMAND")
 
     parser_template = subparsers.add_parser('create', help='Generate proq templates with given configuration')
     create.configure_cli_parser(parser_template)
