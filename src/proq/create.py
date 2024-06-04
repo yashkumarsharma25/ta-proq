@@ -1,89 +1,59 @@
 #!/usr/bin/env python
 import argparse
-
-sample_yaml_headers = {}
-sample_yaml_headers["python"]="""---
-lang: python
-local_evaluate:
-    source_file: test.py
-    build: ""
-    run: python test.py
-seek_config:
-    lang : Python3
-    deadline : 09/28/2023,23:59 # mm/dd/yyyy,HH:MM
-    evaluator : nsjail
-    evaluator_type: test_cases
-    ignore_presentation_error : true
-    allow_compile : true
-    show_sample_solution : true
-    is_public: false
----
-"""
-
-sample_yaml_headers["java"]="""---
-lang: java
-local_evaluate:
-    source_file: Test.java
-    build: javac Test.java
-    run: java Test.class
-seek_config:
-    lang : Java
-    deadline : 09/28/2023,23:59 # mm/dd/yyyy,HH:MM
-    evaluator : nsjail
-    evaluator_type : test_cases
-    ignore_presentation_error : true
-    allow_compile : true
-    show_sample_solution : true
-    is_public: false
-    solution_file: Main.java
----
-"""
-
-solution_content="""
-```{}
-<prefix>
-
-</prefix>
-<template>
-
-<solution>
-
-</solution>
-</template>
-<suffix>
-
-</suffix>
-<suffix_invisible>
-
-</suffix_invisible>
-```
-"""
-
 import os
+from datetime import datetime,timedelta
+from .template_utils import package_env
+
+default_lang_config = {
+    "python": {
+        "lang": "python",
+        "source_file": "test.py",
+        "build": "",
+        "run": "python test.py",
+        "seek_lang": "Python3",
+    },
+    "java": {
+        "lang": "java",
+        "source_file": "Test.java",
+        "build": "javac Test.java",
+        "run": "java Test.class",
+        "seek_lang": "Java",
+        "solution_file": "Test.java"
+    },
+    "c":{
+        "lang": "c",
+        "source_file": "test.c",
+        "build": "gcc test.c -Winfo ",
+        "run": "java Test.class",
+        "seek_lang": "C",
+    }
+}
+
+
 def generate_template(output_file,lang,num_problems, num_public, num_private, pattern):
     if os.path.isfile(output_file):
         raise FileExistsError("A file with the same name already exists.")
     
-    with open(output_file, "w") as file:
-        file.write(sample_yaml_headers.get(lang,sample_yaml_headers["python"]))        
-        file.write(f"\n# Unit Name\n\n")
-
-        for problem_num in range(1, num_problems + 1):
-            file.write(f"## {pattern.format(problem_num)}\n\n")
-            file.write(f"### Problem Statement\n\n")
-            file.write(f"### Solution{solution_content.format(lang)}\n")
-            file.write(f"### Testcases\n\n")
-
-            file.write(f"#### Public Testcases\n\n")
-            for public_testcase_num in range(1, num_public + 1):
-                file.write(f"##### Input {public_testcase_num}\n\n```\n\n```\n\n")
-                file.write(f"##### Output {public_testcase_num}\n\n```\n\n```\n\n")
-
-            file.write(f"#### Private Testcases\n\n")
-            for private_testcase_num in range(1, num_private + 1):
-                file.write(f"##### Input {private_testcase_num}\n\n```\n\n```\n\n")
-                file.write(f"##### Output {private_testcase_num}\n\n```\n\n```\n\n")
-
+    template = package_env.get_template('proq_template.md.jinja')
+    unknown_lang_config = {
+        "lang":lang,
+        "source_file":"",
+        "build":"",
+        "run":"",
+        "seek_lang":""
+    }
+    # deadline is 10 days after the date of creation by default
+    deadline = (datetime.today()+timedelta(days=10)).strftime("%m/%d/%y:23:59")
+    content = template.render(
+        **default_lang_config.get(lang,unknown_lang_config),
+        num_problems=num_problems,
+        num_public=num_public,
+        num_private=num_private,
+        pattern=pattern, 
+        deadline=deadline
+    )
+    with open(output_file,"w") as f:
+        f.write(content)
 
 def configure_cli_parser(parser:argparse.ArgumentParser):
     parser.add_argument(

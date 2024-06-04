@@ -1,27 +1,28 @@
 <popup-component button-content="Python Tutor">
-    <iframe id="pythonTutor"
-        src="https://livinnector.github.io/live-py-tutor/#code=%23%20Write%20your%20code%20here&cumulative=false&curInstr=0&heapPrimitives=false&mode=edit&origin=opt-live.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"
-        frameborder=0 height="100%" width="100%"></iframe>
+  <iframe id="pythonTutor"
+    src="https://livinnector.github.io/live-py-tutor/#code=%23%20Write%20your%20code%20here&cumulative=false&curInstr=0&heapPrimitives=false&mode=edit&origin=opt-live.js&py=3&rawInputLstJSON=%5B%5D&textReferences=false"
+    frameborder=0 height="100%" width="100%"></iframe>
 </popup-component>
 
 <popup-component button-content="Starboard Notebook">
-    <iframe width=100% height=100% src="https://livinnectorpod.github.io/intro-to-python-lecture-notes"
-        frameborder="0"></iframe>
+  <iframe width=100% height=100% src="https://livinnectorpod.github.io/intro-to-python-lecture-notes"
+    frameborder="0"></iframe>
 </popup-component>
 
 <popup-component button-content="Pyodide Terminal">
-    <iframe id="pyodide-iframe" src="https://livinnector.github.io/live-py-tutor/pyodide-console.html" width=100%
-        height=100% style="border-radius:15px"></iframe>
+  <iframe id="pyodide-iframe" src="https://livinnector.github.io/live-py-tutor/pyodide-console.html" width=100%
+    height=100% style="border-radius:15px"></iframe>
 </popup-component>
 
 <script>
-    // Define the Popup Component class
+  // Define the Popup Component class
+  if (!PopupComponent) {
     class PopupComponent extends HTMLElement {
-        constructor() {
-            super();
-            this.attachShadow({ mode: 'open' });
-            this.buttonContent = this.getAttribute('button-content') || 'Click me';
-            this.shadowRoot.innerHTML = `
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.buttonContent = this.getAttribute('button-content') || 'Click me';
+        this.shadowRoot.innerHTML = `
         <style>
           button {
             -webkit-appearance: none;
@@ -100,23 +101,25 @@
           </div>
         </div>
       `;
-        }
+      }
 
-        connectedCallback() {
+      connectedCallback() {
 
-            this.shadowRoot.getElementById('trigger').addEventListener('click', () => {
-                this.shadowRoot.getElementById('overlay').style.display = 'block';
-            });
-            this.shadowRoot.getElementById('close').addEventListener('click', () => {
-                this.shadowRoot.getElementById('overlay').style.display = 'none';
-            });
-            this.shadowRoot.getElementById('overlay').addEventListener('click', (e) => {
-                if (e.target.id === 'overlay') {
-                    this.shadowRoot.getElementById('overlay').style.display = 'none';
-                }
-            });
-        }
+        this.shadowRoot.getElementById('trigger').addEventListener('click', () => {
+          this.shadowRoot.getElementById('overlay').style.display = 'block';
+        });
+        this.shadowRoot.getElementById('close').addEventListener('click', () => {
+          this.shadowRoot.getElementById('overlay').style.display = 'none';
+        });
+        this.shadowRoot.getElementById('overlay').addEventListener('click', (e) => {
+          if (e.target.id === 'overlay') {
+            this.shadowRoot.getElementById('overlay').style.display = 'none';
+          }
+        });
+      }
     }
 
     customElements.define('popup-component', PopupComponent);
+  }
+
 </script>

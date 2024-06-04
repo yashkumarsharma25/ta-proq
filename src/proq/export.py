@@ -2,11 +2,10 @@ from .parse import proq_to_json
 import json
 import os
 import argparse
-from marko.ext.gfm import gfm
 
 import asyncio
 from playwright.async_api import async_playwright
-from importlib.resources import files
+from .template_utils import package_env
 
 async def print_html_to_pdf(html_content, output_pdf_path):
     async with async_playwright() as p:
@@ -17,18 +16,9 @@ async def print_html_to_pdf(html_content, output_pdf_path):
         await page.pdf(path=output_pdf_path, print_background=True)
         await browser.close()
 
-def get_template(template):
-    return files("proq").joinpath("templates").joinpath(template).read_text()
 
 def get_rendered_html(unit_name, proq_data):
-    from jinja2 import Environment, FunctionLoader, select_autoescape
-    env = Environment(
-        loader=FunctionLoader(get_template),
-        autoescape=select_autoescape()
-    )
-    template = env.get_template('proq_template.html.jinja')
-    for problem in proq_data:
-        problem["statement"] = gfm.convert(problem["statement"])
+    template = package_env.get_template('proq_export_template.html.jinja')
     return template.render(unit_name = unit_name,problems = proq_data)
 
 def proq_export(proq_file,output_file=None,format="json"):

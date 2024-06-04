@@ -68,7 +68,7 @@
     <div class="problem">
         <h2>{{ problem.title }}</h2>
         <div class="prob-statement">
-            {{ problem.statement }}
+            {{ problem.statement | gfm}}
         </div>
         <div style="display: flex; flex-direction: row; flex-wrap:wrap; gap: 20px;">
             <div style="flex: content;">
