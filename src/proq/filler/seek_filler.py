@@ -175,11 +175,11 @@ class SeekFiller(Filler):
     async def create_proqs_in_unit(self, unit_name):
         await self.page.wait_for_load_state("domcontentloaded")
         try:
-            unit = self.page.locator("ol.course.ui-sortable>li",has_text=unit_name).locator("ol.unit.ui-sortable")
+            unit = self.page.locator("ol.course.ui-sortable>li",has_text=unit_name).locator("ol.unit.ui-sortable").first
             await expect(unit).to_be_attached(timeout=1000)
         except:
             await self.add_unit(unit_name)
-            unit = self.page.locator("ol.course.ui-sortable>li",has_text=unit_name).locator("ol.unit.ui-sortable")
+            unit = self.page.locator("ol.course.ui-sortable>li",has_text=unit_name).locator("ol.unit.ui-sortable").first
 
         proq_links = await unit.get_by_role("link").filter(has_not_text="open_in_new").all()
             
