@@ -51,9 +51,7 @@
         }
     </style>
     <style>
-        
-    {% include "./style.css" %}
-        
+        {% include "./style.css" %}
     </style>
     {% include "./katex_includes.html" %}
     {% include "./highlightjs_includes.html" %}
@@ -87,50 +85,34 @@
         <h3>Invisible Suffix</h3>
         <pre class="solution"><code>{{problem.code.suffix_invisible | e }}</code></pre>
         {% endif %}
-
-        <h3>Public Test Cases</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Input</th>
-                    <th>Expected Output</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for testcase in problem.testcases.public_testcases %}
-                <tr>
-                    <td>
-                        <pre>{{ testcase.input | e }}</pre>
-                    </td>
-                    <td>
-                        <pre>{{ testcase.output | e }}</pre>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <h3>Private Test Cases</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Input</th>
-                    <th>Expected Output</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for testcase in problem.testcases.private_testcases %}
-                <tr>
-                    <td>
-                        <pre>{{ testcase.input | e }}</pre>
-                    </td>
-                    <td>
-                        <pre>{{ testcase.output | e }}</pre>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div style="display: flex; flex-direction: row; flex-wrap:wrap; gap: 20px;">
+            {% for groupName, testcaseGroup in [["Public",problem.testcases.public_testcases],
+            ["Private",problem.testcases.private_testcases]]%}
+            <div style="flex: content;">
+                <h3>{{groupName}} Test Cases</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Input</th>
+                            <th>Expected Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for testcase in testcaseGroup %}
+                        <tr>
+                            <td>
+                                <pre>{{ testcase.input | e }}</pre>
+                            </td>
+                            <td>
+                                <pre>{{ testcase.output | e }}</pre>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
     </div>
     {% endfor %}
 
