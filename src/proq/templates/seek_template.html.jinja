@@ -1,11 +1,39 @@
-{% if include_math %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
-{% endif %}
+<div id="prob-shadow-wrapper">
+    <div id="prob-shadow-host">
+        <template shadowrootmode="open">
+        {% if include_math %}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
+        {% endif %}
+        
+        {% if include_hjs %}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css"
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+        {% endif %}
 
-{% if include_hjs %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css"
-    crossorigin="anonymous" referrerpolicy="no-referrer">
-{% endif %}
+            <style>
+                {% include "./style.css" %}
+            </style>
+            
+            <div class="prob-statement">
+            
+            {{proq["statement"]|gfm}}
+            
+            <details style="padding:2rem 0;">
+                <summary> <strong>Template Code(Click to Expand)</strong> </summary>
+            
+                <pre><code class="lang-{{proq['lang']}}">{{proq.code.template|e}}</code></pre>
+            
+            </details>
+            
+            </div>
+        </template>
+    </div>
+</div>
+
+<script>
+    div = document.getElementById("prob-shadow-wrapper")
+    div.setHTMLUnsafe(div.innerHTML)
+</script>
 
 {% if include_math or include_hjs %}
 
@@ -19,7 +47,9 @@
     }
     {% if include_hjs %}
     require("https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js", function () {
-        hljs.highlightAll()
+        document.getElementById('prob-shadow-host').shadowRoot.querySelectorAll('pre code').forEach(block => {
+            hljs.highlightElement(block);
+        })
     });
     {% endif %}
 
@@ -37,7 +67,7 @@
             ],
             throwOnError: false
         }
-        renderMathInElement(document.body, katexConfig);
+        renderMathInElement(document.getElementById('prob-shadow-host').shadowRoot, katexConfig);
     }
     )
     {% endif %}
@@ -45,23 +75,6 @@
 </script>
 
 {% endif %}
-
-<style>
-    {% include "./style.css" %} 
-</style>
-
-<div class="prob-statement">
-
-{{proq["statement"]|gfm}}
-
-<details style="padding:2rem 0;">
-    <summary> <strong>Template Code(Click to Expand)</strong> </summary>
-
-    <pre><code class="lang-{{proq['lang']}}">{{proq.code.template|e}}</code></pre>
-
-</details>
-
-</div>
 
 {% if proq["lang"] == "python" %}
 {% include "./python_tools.html" %}
