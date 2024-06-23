@@ -43,7 +43,7 @@ def generate_template(output_file,lang,num_problems, num_public, num_private, pa
         "seek_lang":""
     }
     # deadline is 10 days after the date of creation by default
-    deadline = (datetime.today()+timedelta(days=10)).strftime("%m/%d/%y:23:59")
+    deadline = (datetime.today()+timedelta(days=10)).strftime("%m/%d/%Y,23:59")
     content = template.render(
         **default_lang_config.get(lang,unknown_lang_config),
         num_problems=num_problems,
