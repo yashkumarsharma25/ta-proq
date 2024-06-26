@@ -1,81 +1,12 @@
-<div id="prob-shadow-wrapper">
-    <div id="prob-shadow-host">
-        <template shadowrootmode="open">
-        {% if include_math %}
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
-        {% endif %}
-        
-        {% if include_hjs %}
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css"
-            crossorigin="anonymous" referrerpolicy="no-referrer">
-        {% endif %}
+{{proq["statement"]|gfm}}
 
-            <style>
-                {% include "./style.css" %}
-            </style>
-            
-            <div class="prob-statement">
-            
-            {{proq["statement"]|gfm}}
-            
-            <details style="padding:2rem 0;">
-                <summary> <strong>Template Code(Click to Expand)</strong> </summary>
-            
-                <pre><code class="lang-{{proq['lang']}}">{{proq.code.template|e}}</code></pre>
-            
-            </details>
-            
-            </div>
-        </template>
-    </div>
-</div>
-
-<script>
-    div = document.getElementById("prob-shadow-wrapper")
-    div.setHTMLUnsafe(div.innerHTML)
-</script>
-
-{% if include_math or include_hjs %}
-
-<script>
-    function require(url, callback) {
-        var e = document.createElement("script");
-        e.src = url;
-        e.type = "text/javascript";
-        e.addEventListener('load', callback);
-        document.getElementsByTagName("head")[0].appendChild(e);
-    }
-    {% if include_hjs %}
-    require("https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js", function () {
-        document.getElementById('prob-shadow-host').shadowRoot.querySelectorAll('pre code').forEach(block => {
-            hljs.highlightElement(block);
-        })
-    });
-    {% endif %}
-
-    {% if include_math %}
-    require("https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js")
-    require("https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js", function () {
-        let katexConfig = {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false },
-                { left: '\\(', right: '\\)', display: false },
-                { left: '\\[', right: '\\]', display: true },
-                { left: "\\begin{equation}", right: "\end{equation}", display: true },
-                { left: "\\begin{align}", right: "\end{align}", display: true },
-            ],
-            throwOnError: false
-        }
-        renderMathInElement(document.getElementById('prob-shadow-host').shadowRoot, katexConfig);
-    }
-    )
-    {% endif %}
-
-</script>
-
+{% if proq.code.template%}
+<details style="padding:2rem 0;">
+    <summary> <strong>Template Code(Click to Expand)</strong> </summary>
+    <pre><code class="lang-{{proq['lang']}}">{{proq.code.template|e}}</code></pre>
+</details>
 {% endif %}
 
-{% if proq["lang"] == "python" %}
+{% if proq.lang == "python" %}
 {% include "./python_tools.html" %}
 {% endif %}
