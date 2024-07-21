@@ -34,7 +34,7 @@ def generate_template(output_file,lang,num_problems, num_public, num_private, pa
     if os.path.isfile(output_file):
         raise FileExistsError("A file with the same name already exists.")
     
-    template = package_env.get_template('proq_template.md.jinja')
+    template = package_env.get_template('proq_empty_template.md.jinja')
     unknown_lang_config = {
         "lang":lang,
         "source_file":"",
