@@ -5,6 +5,9 @@ import subprocess
 def get_source_code(code:dict):
     return code["prefix"]+code["solution"]+code["suffix"]+code["suffix_invisible"]
 
+def get_template(code:dict):
+    return code["prefix"]+code["template"]+code["suffix"]+code["suffix_invisible"]
+
 
 class BuildFailedException(Exception):
     pass
@@ -35,22 +38,30 @@ def run_script(run_command, stdin):
         return run_process.stdout.decode('utf-8') + run_process.stderr.decode('utf-8')
 
 
-def check_testcases(run_command, testcases):
+def check_testcases(run_command, testcases, verbose=True):
+    status = []
     for i,testcase in enumerate(testcases,1):
-            stdin = testcase['input']
-            expected_output = testcase['output']
-            actual_output = run_script(run_command, stdin)
-            
-            if actual_output.strip() == expected_output.strip():
+        stdin = testcase['input']
+        expected_output = testcase['output']
+        actual_output = run_script(run_command, stdin)
+        
+        if actual_output.strip() == expected_output.strip():
+            status.append(True)
+            if verbose:
                 print(f"Test case {i} passed")
-            else:
+        else:
+            status.append(False)
+            if verbose:
                 print(f"Test case {i} failed.",
+                    "Input:",
+                    stdin,
                     "Expected output:", 
                     expected_output, 
                     "Actual output:", 
                     actual_output,
                     sep="\n"
                 )
+    return status
 
 def evaluate_proq(proq_file):
     _, problems = proq_to_json(proq_file)
@@ -76,6 +87,26 @@ def evaluate_proq(proq_file):
         check_testcases(run_command,problem["testcases"]["public_testcases"])
         print("Private Testcases")
         check_testcases(run_command,problem["testcases"]["private_testcases"])
+
+        ok_message = "\033[0;32mOK\033[0m"
+        with open(script_file_name, "w") as f:
+            f.write(get_template(problem["code"]))
+        try:
+            if build_command:
+                build(build_command)
+        except BuildFailedException:
+            print(f"Build Failed for {problem['title']}")
+            template_check_status = ok_message
+
+        template_public_testcases = check_testcases(run_command,problem["testcases"]["public_testcases"],verbose=False)
+        template_private_testcases = check_testcases(run_command,problem["testcases"]["public_testcases"],verbose=False)
+        if not any(template_public_testcases+template_private_testcases):
+            template_check_status = ok_message
+        else:
+            template_check_status = f"\033[0;31mFailed\nPublic Testcases : {template_public_testcases.count(True)}/{len(template_public_testcases)} Passed"
+            template_check_status += f"\nPrivate Testcases : {template_private_testcases.count(True)}/{len(template_private_testcases)} Passed\033[0m"
+        print(f"Template Check Status({problem['title']}):",template_check_status)
+        
         print()
 
 import os
