@@ -103,8 +103,9 @@ def evaluate_proq(proq_file):
         if not any(template_public_testcases+template_private_testcases):
             template_check_status = ok_message
         else:
-            template_check_status = f"\033[0;31mFailed\nPublic Testcases : {template_public_testcases.count(True)}/{len(template_public_testcases)} Passed"
-            template_check_status += f"\nPrivate Testcases : {template_private_testcases.count(True)}/{len(template_private_testcases)} Passed\033[0m"
+            true_indices = lambda items: map(lambda x:x[0], filter(lambda x: x[1], enumerate(items,1)))
+            template_check_status = f"\033[0;31mFailed\nPublic Testcases : {','.join(map(str,true_indices(template_public_testcases)))} Passed"
+            template_check_status += f"\nPrivate Testcases : {','.join(map(str,true_indices(template_private_testcases)))} Passed\033[0m"
         print(f"Template Check Status({problem['title']}):",template_check_status)
         
         print()
