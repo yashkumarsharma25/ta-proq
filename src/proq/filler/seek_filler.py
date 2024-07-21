@@ -1,15 +1,17 @@
-from ..parse import proq_to_json
+from ..parse import load_proq
 from .utils import to_seek
 from playwright.async_api import expect
 from .filler import Filler
 import asyncio
+from ..evaluate import evaluate_proq
+import logging
 
 
 class SeekFiller(Filler):
     backend_link_format = "https://backend.seek.{domain}.iitm.ac.in/modules/firebase_auth/login?continue=https://backend.seek.{domain}.iitm.ac.in/{course_code}/dashboard"
 
     def load_data(self, proq_file):
-        self.unit_name, self.proqs = proq_to_json(proq_file)
+        self.unit_name, self.proqs = load_proq(proq_file)
         for proq in self.proqs:
             proq["statement"] = to_seek(proq)
 
@@ -203,7 +205,7 @@ class SeekFiller(Filler):
         return {proq["title"]: status for proq, status in zip(self.proqs, statuses)}
 
 
-    async def upload_proqs(self, proq_file, course_code, proqs=None, headless=True, login_id=None, profile=None, domain="onlinedegree"):
+    async def upload_proqs(self, proq_file, course_code, proq_nums=None, headless=True, login_id=None, profile=None, domain="onlinedegree"):
         if not proq_file:
             proq_file = input("Enter problems file name: ")
 
@@ -211,11 +213,31 @@ class SeekFiller(Filler):
         print(f"Unit Name: {self.unit_name}")
         print("Below proqs are identified.")
         print(*(f"{i}. {proq['title']}" for i, proq in enumerate(self.proqs,1)),sep="\n")
-        if proqs:
-            proqs = list(map(int,proqs))
-            self.proqs = [proq for i, proq in enumerate(self.proqs,1) if i in proqs]
+        if proq_nums:
+            proq_nums = list(map(int,proq_nums))
+            self.proqs = [proq for i, proq in enumerate(self.proqs,1) if i in proq_nums]
+        proqs_checks = evaluate_proq(self.proqs)
+        to_remove = []
+        for i,proq in enumerate(self.proqs):
+            proq_checks = proqs_checks[proq["title"]]
+            if not (proq_checks.solution_checks and proq_checks.template_checks):
+                print("Proq checks failed: Cannot upload {}. Solution checks: {}, Template checks: {}".format(
+                    proq['title'],
+                    "PASSED" if proq_checks.solution_checks else "FAILED",
+                    "PASSED" if proq_checks.template_checks else "FAILED",
+                ))
+                print(f'''Use `proq evaluate` to check the testcases.''')
+                to_remove.append(i)
+
+        for idx in to_remove[::-1]:
+            self.proqs.pop(idx)
+        if not self.proqs:
+            print("No Proqs to configure. Exiting.")
+            return 
+        
         print("Below proqs are selected for update.")
         print(*(f"{i}. {proq['title']}" for i, proq in enumerate(self.proqs,1)),sep="\n")                
+        
         choice = input("Do you want to continue? (y/n)")
         if choice.lower()!='y':
             print("Exiting.")

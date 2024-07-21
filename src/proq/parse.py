@@ -3,7 +3,9 @@ from marko import Markdown
 import yaml
 import os
 import re
+from collections import namedtuple
 
+ProqSet = namedtuple("ProqSet", ["unit_name","proqs"])
 
 def extract_codeblock_content(text):
     return (
@@ -99,8 +101,8 @@ def load_relative_to(file_name):
             return f.read()
     return inner
 
-def proq_to_json(proq_file) -> tuple[str, dict]:
-    """Loads the proq file and returns a tuple (unit_name, proq_data)
+def load_proq(proq_file) -> ProqSet:
+    """Loads the proq file and returns a Proq
     """
     from jinja2 import Environment,FunctionLoader, select_autoescape
 
@@ -114,21 +116,21 @@ def proq_to_json(proq_file) -> tuple[str, dict]:
     _, yaml_header, markdown = raw_content.split("---", 2)
     markdown_content = dictify(markdown)
     yaml_header = yaml.safe_load(yaml_header)
-    unit_name, problems = markdown_content.popitem()
+    unit_name, proqs = markdown_content.popitem()
     unit_name = clean_white_space(unit_name)
-    problem_names = list(problems.keys())
-    for problem_name in problem_names:
-        problem = problems[problem_name]
-        problem["title"] = clean_white_space(problem_name)
-        problem["statement"] = problem.pop("Problem Statement")
-        problem["code"] = extract_solution(problem.pop("Solution"))
-        problem["testcases"] = problem.pop("Testcases")
-        problem["testcases"]["public_testcases"] = extract_testcases(
-            problem["testcases"].pop("Public Testcases")
+    proq_names = list(proqs.keys())
+    for proq_name in proq_names:
+        proq = proqs[proq_name]
+        proq["title"] = clean_white_space(proq_name)
+        proq["statement"] = proq.pop("Problem Statement")
+        proq["code"] = extract_solution(proq.pop("Solution"))
+        proq["testcases"] = proq.pop("Testcases")
+        proq["testcases"]["public_testcases"] = extract_testcases(
+            proq["testcases"].pop("Public Testcases")
         )
-        problem["testcases"]["private_testcases"] = extract_testcases(
-            problem["testcases"].pop("Private Testcases")
+        proq["testcases"]["private_testcases"] = extract_testcases(
+            proq["testcases"].pop("Private Testcases")
         )
-        problem.update(yaml_header)
-    problems = list(problems.values())
-    return unit_name, problems
+        proq.update(yaml_header)
+    proqs = list(proqs.values())
+    return ProqSet(unit_name, proqs)

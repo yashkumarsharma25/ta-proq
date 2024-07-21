@@ -6,7 +6,7 @@ def configure_cli_parser(parser:argparse.ArgumentParser):
     parser.add_argument(
         "proq_file", metavar="PROQ_FILE", type=str, help="The Proq file"
     )
-    parser.add_argument("proqs", metavar="PROQS", type=str, nargs="*", help="The proq numbers to update only the selected proqs from the file")
+    parser.add_argument("proq_nums", metavar="PROQ_NUMS", type=str, nargs="*", help="The proq numbers to update only the selected proqs from the file")
     parser.add_argument(
         "--show-browser",
         action="store_true",
@@ -34,7 +34,7 @@ def configure_cli_parser(parser:argparse.ArgumentParser):
             proq_file = args.proq_file,
             course_code = args.course_code,
             headless= not args.show_browser,
-            proqs = args.proqs,
+            proq_nums = args.proq_nums,
             domain= args.domain,
             profile = args.profile,
             login_id = args.login_id

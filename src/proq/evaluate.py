@@ -1,6 +1,9 @@
-from .parse import proq_to_json
+from .parse import load_proq, ProqSet
 import sys 
 import subprocess
+from collections import namedtuple
+
+ProqChecks = namedtuple("ProqChecks",["solution_checks","template_checks"])
 
 def get_source_code(code:dict):
     return code["prefix"]+code["solution"]+code["suffix"]+code["suffix_invisible"]
@@ -9,19 +12,26 @@ def get_template(code:dict):
     return code["prefix"]+code["template"]+code["suffix"]+code["suffix_invisible"]
 
 
-class BuildFailedException(Exception):
-    pass
+def write_to_file(content, file_name):
+    with open(file_name, "w") as f:
+        f.write(content)
 
-def build(build_command):
+def build(build_command) -> bool:
+    '''
+    Builds with the given build command.
+
+    Args:
+        build_command : str - build command to run in a subprocess
+
+    Return:
+        bool - Return code from the build process
+    '''
     build_process = subprocess.run(
         build_command.split(" "), 
         stdout=subprocess.PIPE, 
         stderr=subprocess.PIPE
     )
-    if build_process.returncode == 0:
-        print("Compilation successful.")
-    else:
-        raise BuildFailedException
+    return build_process.returncode==0
 
 
 def run_script(run_command, stdin):
@@ -38,7 +48,7 @@ def run_script(run_command, stdin):
         return run_process.stdout.decode('utf-8') + run_process.stderr.decode('utf-8')
 
 
-def check_testcases(run_command, testcases, verbose=True):
+def check_testcases(run_command, testcases, verbose=False):
     status = []
     for i,testcase in enumerate(testcases,1):
         stdin = testcase['input']
@@ -48,68 +58,99 @@ def check_testcases(run_command, testcases, verbose=True):
         if actual_output.strip() == expected_output.strip():
             status.append(True)
             if verbose:
-                print(f"Test case {i} passed")
+                print(f"\033[0;32mTest case {i} passed\033[0m")
         else:
             status.append(False)
             if verbose:
-                print(f"Test case {i} failed.",
-                    "Input:",
-                    stdin,
+                print(f"\033[0;31mTest case {i} failed.")
+                if stdin.strip():
+                    print("Input:",stdin,sep="/n")
+                print(
                     "Expected output:", 
                     expected_output, 
                     "Actual output:", 
                     actual_output,
+                    "\033[0m",
                     sep="\n"
                 )
     return status
 
-def evaluate_proq(proq_file):
-    _, problems = proq_to_json(proq_file)
-
-    for problem in problems:
+def evaluate_proq(proqs,verbose=False)->dict[str,ProqChecks]:
+    proq_checks = {}
+    for problem in proqs:
         script_file_name = problem["local_evaluate"]["source_file"]
         build_command = problem["local_evaluate"].get("build", None)
         run_command = problem["local_evaluate"]["run"]
-
+        public_testcases  = problem["testcases"]["public_testcases"]
+        private_testcases  = problem["testcases"]["private_testcases"]
         # write source code to file
-        print(problem["title"])
-        with open(script_file_name, "w") as f:
-            f.write(get_source_code(problem["code"]))
+        if verbose:
+            print(problem["title"])
+        
+        # write solution
+        write_to_file(get_source_code(problem["code"]),script_file_name)
 
-        try:
-            if build_command:
-                build(build_command)
-        except BuildFailedException:
-            print(f"Build Failed for {problem['title']}")
+        # build source
+        if build_command:
+            build_passed = build(build_command) 
+            if not build_passed:
+                if verbose:
+                    print(f"\033[0;31mBuild Failed\033[0m")
+                proq_checks[problem['title']] = ProqChecks(
+                    solution_checks=False,
+                    template_checks=False
+                )
+                continue
+        
+        # check testcases with source
+        if verbose:
+            print("\033[0;1mPublic Testcases\033[0m")
+        solution_public_testcases = check_testcases(run_command,public_testcases, verbose=verbose)
+        if verbose:
+            print("\033[0;1mPrivate Testcases\033[0m")
+        solution_private_testcases = check_testcases(run_command,private_testcases, verbose=verbose)
+        solution_passed = all(solution_public_testcases+solution_private_testcases)
+        if not solution_passed:
+            proq_checks[problem['title']] = ProqChecks(
+                solution_checks=False,
+                template_checks=False
+            )
             continue
 
-        print("Public Testcases")
-        check_testcases(run_command,problem["testcases"]["public_testcases"])
-        print("Private Testcases")
-        check_testcases(run_command,problem["testcases"]["private_testcases"])
+        # Template check
 
-        ok_message = "\033[0;32mOK\033[0m"
-        with open(script_file_name, "w") as f:
-            f.write(get_template(problem["code"]))
-        try:
-            if build_command:
-                build(build_command)
-        except BuildFailedException:
-            print(f"Build Failed for {problem['title']}")
-            template_check_status = ok_message
+        # write solution
+        write_to_file(get_template(problem["code"]),script_file_name)
 
-        template_public_testcases = check_testcases(run_command,problem["testcases"]["public_testcases"],verbose=False)
-        template_private_testcases = check_testcases(run_command,problem["testcases"]["public_testcases"],verbose=False)
-        if not any(template_public_testcases+template_private_testcases):
-            template_check_status = ok_message
-        else:
-            true_indices = lambda items: map(lambda x:x[0], filter(lambda x: x[1], enumerate(items,1)))
-            template_check_status = f"\033[0;31mFailed\nPublic Testcases : {','.join(map(str,true_indices(template_public_testcases)))} Passed"
-            template_check_status += f"\nPrivate Testcases : {','.join(map(str,true_indices(template_private_testcases)))} Passed\033[0m"
-        print(f"Template Check Status({problem['title']}):",template_check_status)
+        build_passed = True
+        if build_command:
+            build_passed = build(build_command)
         
-        print()
+        if build_passed:
+            template_public_testcases = check_testcases(run_command,public_testcases,verbose=False)
+            template_private_testcases = check_testcases(run_command,private_testcases,verbose=False)
+        
+        any_template_passed = build_passed and any(
+            template_public_testcases+template_private_testcases
+        )
 
+        proq_checks[problem['title']] = ProqChecks(
+            solution_checks=True,
+            template_checks=not any_template_passed
+        )
+
+        if verbose:
+            print(f"\033[0;1mTemplate Check:\033[0m ",end="")
+            if proq_checks[problem['title']].template_checks:
+                print("\033[0;32mSuccess\033[0m")
+            else:
+                true_indices = lambda items: map(lambda x:x[0], filter(lambda x: x[1], enumerate(items,1)))
+                print(f"\033[0;31mFailed\nPublic Testcases : {','.join(map(str,true_indices(template_public_testcases)))} Passed")
+                print(f"Private Testcases : {','.join(map(str,true_indices(template_private_testcases)))} Passed\033[0m")
+            print()
+        
+    return proq_checks
+    
 import os
 import argparse 
 
@@ -119,7 +160,7 @@ def evaluate_proqs(files):
             print(f"{file_path} is not a valid file")
             continue
         print(f"Evaluating file {file_path}")
-        evaluate_proq(file_path)
+        evaluate_proq(load_proq(file_path).proqs,verbose=True)
 
 def configure_cli_parser(parser:argparse.ArgumentParser):
     parser.add_argument("files", metavar="F", type=str, nargs="+", help="proq files to be evaluated")

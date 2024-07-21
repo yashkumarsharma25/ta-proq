@@ -1,4 +1,4 @@
-from .parse import proq_to_json
+from .parse import load_proq, ProqSet
 import json
 import os
 import argparse
@@ -17,9 +17,9 @@ async def print_html_to_pdf(html_content, output_pdf_path):
         await browser.close()
 
 
-def get_rendered_html(unit_name, proq_data):
+def get_rendered_html(proq:ProqSet):
     template = package_env.get_template('proq_export_template.html.jinja')
-    return template.render(unit_name = unit_name,problems = proq_data)
+    return template.render(unit_name = proq.unit_name, problems = proq.problems)
 
 def proq_export(proq_file,output_file=None,format="json"):
     if not os.path.isfile(proq_file):
@@ -29,15 +29,15 @@ def proq_export(proq_file,output_file=None,format="json"):
         assert format in ["json","html","pdf"], "Export format not valid. Supported formats are json and html."
         output_file = ".".join(proq_file.split(".")[:-1])+f".{format}"
         
-    unit_name, proq_data = proq_to_json(proq_file)
+    proq = load_proq(proq_file)
     with open(output_file, "w") as f:
         if format == "json":
-            json.dump(proq_data, f, indent=2)
+            json.dump(proq.problems, f, indent=2)
         elif format == "html":
             with open(output_file,"w") as f:
-                f.write(get_rendered_html(unit_name, proq_data))
+                f.write(get_rendered_html(proq))
         elif format == "pdf":
-            asyncio.run(print_html_to_pdf(get_rendered_html(unit_name, proq_data), output_file))
+            asyncio.run(print_html_to_pdf(get_rendered_html(proq), output_file))
 
     print(f"Proqs dumped to {output_file}")
     
