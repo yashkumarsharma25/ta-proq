@@ -79,6 +79,12 @@
                 <pre
                     class="solution">{%if problem.code.prefix.strip() %}<code class="dim lang-{{problem.lang}}">{{problem.code.prefix | e}}</code>{% endif %}<code class="lang-{{problem.lang}}">{{ problem.code.solution | e }}</code>{%if problem.code.suffix.strip() %}<code class="dim lang-{{problem.lang}}">{{problem.code.suffix | e}}</code>{% endif%}</pre>
             </div>
+            <div style="flex: content;">
+                <h3>Template - Solution Diff</h3>
+                <pre
+                    class="solution">{%if problem.code.prefix.strip() %}<code class="dim lang-{{problem.lang}}">{{problem.code.prefix | e}}</code>{% endif %}<output style="padding-block:1rem">{{ problem.code.template_solution_diff}}</output>{%if problem.code.suffix.strip() %}<code class="dim lang-{{problem.lang}}">{{problem.code.suffix | e}}</code>{% endif%}</pre>
+            
+            </div>
         </div>
 
         {% if problem.code.suffix_invisible %}

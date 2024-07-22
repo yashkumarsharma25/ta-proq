@@ -6,6 +6,21 @@ import argparse
 import asyncio
 from playwright.async_api import async_playwright
 from .template_utils import package_env
+import difflib
+
+def get_template_solution_diff(template, solution):
+    differ = difflib.Differ()
+    differences = differ.compare(template.splitlines(keepends=True),solution.splitlines(keepends=True))
+    differences_html = []
+    diff_color = {
+        '+ ':'rgba(0,255,0,.2)',
+        '- ':'rgba(255,0,0,.2)',
+        '? ':'rgba(0,0,255,.2)',
+        '  ':'white'
+    }
+    for diff in differences:
+        differences_html.append(f'''<span style="background:{diff_color[diff[:2]]}">{diff[2:]}</span>''')
+    return "".join(differences_html)
 
 async def print_html_to_pdf(html_content, output_pdf_path):
     async with async_playwright() as p:
@@ -17,9 +32,11 @@ async def print_html_to_pdf(html_content, output_pdf_path):
         await browser.close()
 
 
-def get_rendered_html(proq:ProqSet):
+def get_rendered_html(proq_set:ProqSet):
     template = package_env.get_template('proq_export_template.html.jinja')
-    return template.render(unit_name = proq.unit_name, problems = proq.problems)
+    for proq in proq_set.proqs:
+        proq['code']['template_solution_diff'] = get_template_solution_diff(proq['code']['template'],proq['code']['solution'])
+    return template.render(unit_name = proq_set.unit_name, problems = proq_set.proqs)
 
 def proq_export(proq_file,output_file=None,format="json"):
     if not os.path.isfile(proq_file):
