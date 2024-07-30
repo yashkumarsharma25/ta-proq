@@ -64,7 +64,7 @@ def check_testcases(run_command, testcases, verbose=False):
             if verbose:
                 print(f"\033[0;31mTest case {i} failed.")
                 if stdin.strip():
-                    print("Input:",stdin,sep="/n")
+                    print("Input:",stdin,sep="\n")
                 print(
                     "Expected output:", 
                     expected_output, 
