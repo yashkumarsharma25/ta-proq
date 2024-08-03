@@ -55,7 +55,7 @@ def check_testcases(run_command, testcases, verbose=False):
         expected_output = testcase['output']
         actual_output = run_script(run_command, stdin)
         
-        if actual_output.strip() == expected_output.strip():
+        if actual_output.strip().replace("\r","") == expected_output.strip():
             status.append(True)
             if verbose:
                 print(f"\033[0;32mTest case {i} passed\033[0m")
