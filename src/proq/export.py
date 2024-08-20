@@ -46,15 +46,15 @@ def proq_export(proq_file,output_file=None,format="json"):
         assert format in ["json","html","pdf"], "Export format not valid. Supported formats are json and html."
         output_file = ".".join(proq_file.split(".")[:-1])+f".{format}"
         
-    proq = load_proq(proq_file)
+    proq_set = load_proq(proq_file)
     with open(output_file, "w") as f:
         if format == "json":
-            json.dump(proq.problems, f, indent=2)
+            json.dump(proq_set.proqs, f, indent=2)
         elif format == "html":
             with open(output_file,"w") as f:
-                f.write(get_rendered_html(proq))
+                f.write(get_rendered_html(proq_set))
         elif format == "pdf":
-            asyncio.run(print_html_to_pdf(get_rendered_html(proq), output_file))
+            asyncio.run(print_html_to_pdf(get_rendered_html(proq_set), output_file))
 
     print(f"Proqs dumped to {output_file}")
     
