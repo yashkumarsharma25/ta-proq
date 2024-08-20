@@ -142,7 +142,7 @@ def evaluate_proq(proqs,verbose=False)->dict[str,ProqChecks]:
         if verbose:
             print(f"\033[0;1mTemplate Check:\033[0m ",end="")
             if proq_checks[problem['title']].template_checks:
-                print("\033[0;32mSuccess\033[0m")
+                print("\033[0;32mPassed\033[0m")
             else:
                 true_indices = lambda items: map(lambda x:x[0], filter(lambda x: x[1], enumerate(items,1)))
                 print(f"\033[0;31mFailed\nPublic Testcases : {','.join(map(str,true_indices(template_public_testcases)))} Passed")
