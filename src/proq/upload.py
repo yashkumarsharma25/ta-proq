@@ -24,9 +24,8 @@ def configure_cli_parser(parser:argparse.ArgumentParser):
     parser.add_argument(
         "--domain",
         type=str,
-        choices=["nptel", "onlinedegree"],
-        default="onlinedegree",
-        help="Domain (nptel or onlinedegree)",
+        default="seek.onlinedegree",
+        help="Domain in the URL",
         required=False,
     )
     parser.set_defaults(
