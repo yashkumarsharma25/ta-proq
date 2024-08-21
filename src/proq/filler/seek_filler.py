@@ -16,8 +16,8 @@ class SeekFiller(Filler):
             proq["statement"] = to_seek(proq)
 
     async def goto_course_dashboard(self,course_code,domain="seek.onlinedegree"):
-        await self.page.goto(backend_auth_link_format.format(domain=domain, course_code=course_code))
-        await self.page.wait_for_url(backend_dashboard_link_format.format(domain=domain,course_code=course_code))
+        await self.page.goto(self.backend_auth_link_format.format(domain=domain, course_code=course_code))
+        await self.page.wait_for_url(self.backend_dashboard_link_format.format(domain=domain,course_code=course_code))
 
 
     async def add_unit(self, unit_name):
