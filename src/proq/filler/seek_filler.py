@@ -203,7 +203,7 @@ class SeekFiller(Filler):
         return {proq["title"]: status for proq, status in zip(self.proqs, statuses)}
 
 
-    async def upload_proqs(self, proq_file, course_code, proq_nums=None, headless=True, login_id=None, profile=None, domain="onlinedegree"):
+    async def upload_proqs(self, proq_file, course_code, proq_nums=None, headless=True, login_id=None, profile=None, domain="seek.onlinedegree"):
         if not proq_file:
             proq_file = input("Enter problems file name: ")
 
@@ -245,7 +245,7 @@ class SeekFiller(Filler):
             course_code = input("Enter course code: ")
 
         await self.init(headless=headless,login_id=login_id,profile_directory=profile)
-        await self.goto_course_dashboard(course_code)
+        await self.goto_course_dashboard(course_code, domain)
 
         print(f"Creating the proqs in {self.unit_name}")
         await self.create_proqs_in_unit(self.unit_name)
