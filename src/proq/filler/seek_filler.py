@@ -8,18 +8,16 @@ import logging
 
 
 class SeekFiller(Filler):
-    backend_link_format = "https://backend.seek.{domain}.iitm.ac.in/modules/firebase_auth/login?continue=https://backend.seek.{domain}.iitm.ac.in/{course_code}/dashboard"
-
+    backend_auth_link_format = "https://backend.{domain}.iitm.ac.in/modules/firebase_auth/login?continue=https://backend.{domain}.iitm.ac.in/{course_code}/dashboard"
+    backend_dashboard_link_format = "https://backend.{domain}.iitm.ac.in/{course_code}/dashboard"
     def load_data(self, proq_file):
         self.unit_name, self.proqs = load_proq(proq_file)
         for proq in self.proqs:
             proq["statement"] = to_seek(proq)
 
-    async def goto_course_dashboard(self,course_code,domain="onlinedegree"):
-        await self.page.goto(
-            f"https://backend.seek.{domain}.iitm.ac.in/modules/firebase_auth/login?continue=https://backend.seek.{domain}.iitm.ac.in/{course_code}/dashboard"
-        )
-        await self.page.wait_for_url(f"https://backend.seek.{domain}.iitm.ac.in/{course_code}/dashboard")
+    async def goto_course_dashboard(self,course_code,domain="seek.onlinedegree"):
+        await self.page.goto(backend_auth_link_format.format(domain=domain, course_code=course_code))
+        await self.page.wait_for_url(backend_dashboard_link_format.format(domain=domain,course_code=course_code))
 
 
     async def add_unit(self, unit_name):
