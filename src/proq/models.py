@@ -1,17 +1,29 @@
 import re
 import difflib
+import json
+import proq.data
+from importlib.resources import files
 
 from pydantic import (
     BaseModel,
     AliasChoices,
     Field,
+    BeforeValidator,
     computed_field,
     field_validator,
 )
-from typing import Literal, Generic, TypeVar
+from typing import Generic, TypeVar, Annotated
+from enum import StrEnum
 
-ProgLang = Literal[
-    "c", "cpp", "java", "py", "py3", "verilog", "pl", "hs", "zip", "bash", "javascript"
+# curl https://emkc.org/api/v2/piston/runtimes | jq "sort_by(.language)| map({language: .language, aliases: .aliases})" > runtimes.json
+# langs and aliases taken from piston 
+runtimes = json.loads(files(proq.data).joinpath("runtimes.json").read_text())
+lang_code = {runtime["language"]: runtime["language"] for runtime in runtimes} | {
+    alias: runtime["language"] for runtime in runtimes for alias in runtime["aliases"]
+}
+prog_langs = list({runtime["language"] for runtime in runtimes})
+ProgLang = Annotated[
+    StrEnum("ProgLangs", prog_langs), BeforeValidator(lambda x: lang_code[x])
 ]
 
 
@@ -39,7 +51,7 @@ class Solution(BaseModel):
         validation_alias=AliasChoices("suffix_invisible", "invisible_suffix"),
         description="The invisible part of the suffix that comes after suffix",
     )
-    lang: ProgLang = "py3"
+    lang: ProgLang = "python"
     execute_config: ExecuteConfig | None
 
     @computed_field(return_type=str)
@@ -82,6 +94,7 @@ class ProQ(BaseModel):
     @field_validator("title")
     @classmethod
     def remove_duplicates(cls, word):
+        """Removes multiple spaces and strips whitespace in beginning and end."""
         return re.sub(re.compile(r"\s+"), " ", word).strip()
 
 
