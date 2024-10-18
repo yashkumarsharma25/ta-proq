@@ -1,136 +1,153 @@
-from md2json import dictify
-from marko import Markdown
-import yaml
 import os
 import re
-from collections import namedtuple
+import yaml
+import argparse
+import shlex
 
-ProqSet = namedtuple("ProqSet", ["unit_name","proqs"])
+from marko import Markdown
+from md2json import dictify
 
-def extract_codeblock_content(text):
-    return (
-        [
-            block
-            for block in Markdown().parse(text).children
-            if (block.get_type() == "FencedCode" or block.get_type() == "CodeBlock")
-        ][0]
-        .children[0]
-        .children
-    )
+from .template_utils import get_relative_env
+from .models import ProQ, NestedContent
 
-def clip_extra_lines(text:str)->str:
+
+def clip_extra_lines(text: str) -> str:
     """
-    Reduces sequences of more than two consecutive line breaks 
+    Reduces sequences of more than two consecutive line breaks
     to exactly two line breaks.
-    Also strip blank lines in the begining and end.
+    Also strip blank lines in the beginning and end.
     """
-    return re.sub(r'\n\s*\n', '\n\n', text,flags=re.DOTALL).lstrip("\n").rstrip()
+
+    text = re.sub(r"\n\s*\n", "\n\n", text, flags=re.DOTALL).lstrip("\n")
+    text = re.sub(r"\s*\n\s*$", "\n", text, flags=re.DOTALL)
+    return text
 
 
-
-def get_tag_content(tag:str, html:str)->str:
+def get_tag_content(tag: str, html: str) -> str:
     """Get the inner html of first match of a tag.
     Returns empty string if tag not found
     """
-    content = re.findall(
-        f"<{re.escape(tag)}>(.*?)</{re.escape(tag)}>", html, re.DOTALL
-    )
+    content = re.findall(f"<{re.escape(tag)}>(.*?)</{re.escape(tag)}>", html, re.DOTALL)
     content = clip_extra_lines(content[0]) if content else ""
     return content
 
-def remove_all_matching_tags(tag, html):
+
+def remove_tag(html, tag):
     return re.sub(
         f"<{re.escape(tag)}>(.*?)</{re.escape(tag)}>", "", html, flags=re.DOTALL
     )
 
-def strip_tags(html: str,tags: list[str]) -> str:
+
+def remove_tags(html, tags: list[str]):
+    for tag in tags:
+        html = remove_tag(html, tag)
+    return html
+
+
+def strip_tags(html: str, tags: list[str]) -> str:
     """Removes all tags from an HTML text."""
-    return re.sub(r'<\/?({tags}).*?>'.format(tags="|".join(tags)), "", html,flags=re.DOTALL)
+    return re.sub(
+        r"<\/?({tags}).*?>".format(tags="|".join(tags)), "", html, flags=re.DOTALL
+    )
 
 
-def extract_solution(solution):
+execute_config_parser = argparse.ArgumentParser()
+execute_config_parser.add_argument("source_filename", type=str, nargs="?")
+execute_config_parser.add_argument("-b", "--build", type=str, required=False)
+execute_config_parser.add_argument("-r", "--run", type=str, required=False)
+
+
+def parse_execute_config(config_string):
+    return dict(
+        execute_config_parser.parse_args(shlex.split(config_string))._get_kwargs()
+    )
+
+
+def extract_codeblock_content(text):
+    block = next(
+        iter(
+            block
+            for block in Markdown().parse(text).children
+            if (block.get_type() == "FencedCode" or block.get_type() == "CodeBlock")
+        )
+    )
+    return {
+        "lang": block.lang,
+        "execute_config": parse_execute_config(block.extra),
+        "code": block.children[0].children,
+    }
+
+
+def extract_solution(solution_codeblock):
+    solution = extract_codeblock_content(solution_codeblock)
+    solution_template = solution.pop("code")
     code = {}
-    solution = extract_codeblock_content(solution)
-    code_parts = ["prefix", "suffix", "suffix_invisible","template"]
-    for part in code_parts:
-        code[part] = get_tag_content(part, solution)
-        # remove if only white space 
-        if code[part].strip() == "": 
-            code[part] = ""
-    code["solution"] = str(code["template"])
+    for part in [
+        "prefix",
+        "suffix",
+        "suffix_invisible",
+        "invisible_suffix",
+        "template",
+    ]:
+        code[part] = get_tag_content(part, solution_template)
 
-    for tag in ["solution","sol"]:
-        code["template"] = remove_all_matching_tags(tag, code["template"])
-    
-    # opposite of sol will be in template but removed from solution 
-    for tag in ["los"]: 
-        code["solution"] = remove_all_matching_tags(tag, code["solution"])
-    
-    code["prefix"] = clip_extra_lines(code["prefix"])+"\n"
-    code["solution"] = clip_extra_lines(strip_tags(code["solution"],["sol","solution"]))+"\n"
-    code["template"] = clip_extra_lines(strip_tags(code["template"],["los"]))+"\n"
-    code["suffix"] = clip_extra_lines(code["suffix"])+"\n"
+    code["solution"] = code["template"]
+    code["template"] = strip_tags(
+        remove_tags(code["template"], ["solution", "sol"]), ["los"]
+    )
 
-    code["prefix"] =  code["prefix"] if code["prefix"].strip() else ""
-    code["suffix"] =  code["suffix"] if code["suffix"].strip() else ""
-    
-    return code
+    # opposite of sol will be in template but removed from solution
+    code["solution"] = strip_tags(
+        remove_tag(code["solution"], "los"), ["sol", "solution"]
+    )
+    return solution | code
 
 
 def extract_testcases(testcases_dict):
     testcases_list = list(testcases_dict.values())
-    testcases = []
-    for input, output in zip(testcases_list[::2], testcases_list[1::2]):
-        testcases.append(
-            {
-                "input": extract_codeblock_content(input),
-                "output": extract_codeblock_content(output),
-            }
-        )
-    return testcases
+    return [
+        {
+            "input": extract_codeblock_content(input)["code"],
+            "output": extract_codeblock_content(output)["code"],
+        }
+        for input, output in zip(testcases_list[::2], testcases_list[1::2])
+    ]
 
-dirty_white_space_pattern = re.compile(r"\s+")
-def clean_white_space(word):
-    return re.sub(dirty_white_space_pattern, " ",word)
 
-def load_relative_to(file_name):
-    def inner(template):
-        dir = os.path.dirname(file_name)
-        path = os.path.abspath(os.path.join(dir,template))
-        with open(path) as f:
-            return f.read()
-    return inner
-
-def load_proq(proq_file) -> ProqSet:
-    """Loads the proq file and returns a Proq
-    """
-    from jinja2 import Environment,FunctionLoader, select_autoescape
-
-    env = Environment(
-        loader=FunctionLoader(load_relative_to(proq_file)),
-        autoescape=select_autoescape()
+def load_proq_from_file(proq_file) -> ProQ:
+    """Loads the proq file and returns a Proq"""
+    md_file = (
+        get_relative_env(proq_file).get_template(os.path.basename(proq_file)).render()
     )
-    template = env.get_template(os.path.basename(proq_file))
-    
-    raw_content = template.render()
-    _, yaml_header, markdown = raw_content.split("---", 2)
-    markdown_content = dictify(markdown)
+    yaml_header, md_string = md_file.split("---", 2)[1:]
     yaml_header = yaml.safe_load(yaml_header)
-    unit_name, proqs = markdown_content.popitem()
-    unit_name = clean_white_space(unit_name)
-    proq_names = list(proqs.keys())
-    for proq_name in proq_names:
-        proq = proqs[proq_name]
-        proq["title"] = clean_white_space(proq_name)
-        proq["statement"] = proq.pop("Problem Statement")
-        proq["code"] = extract_solution(proq.pop("Solution"))
-        proq["testcases"] = proq.pop("Testcases")
-        proq["testcases"]["public_testcases"] = extract_testcases(
-            proq["testcases"].pop("Public Testcases")
-        )
-        proq["testcases"]["private_testcases"] = extract_testcases(
-            proq["testcases"].pop("Private Testcases")
-        )
-        proq.update(yaml_header)
-    proqs = list(proqs.values())
-    return ProqSet(unit_name, proqs)
+    proq = dictify(md_string)
+    proq["Solution"] = extract_solution(proq["Solution"])
+    proq["Public Test Cases"] = extract_testcases(proq["Public Test Cases"])
+    proq["Private Test Cases"] = extract_testcases(proq["Private Test Cases"])
+    proq.update(yaml_header)
+    return ProQ.model_validate(proq)
+
+
+def load_nested_proq_from_file(yaml_file) -> NestedContent[ProQ]:
+    """
+    Loads a nested content structure with proqs at leaf nodes.
+    """
+    with open(yaml_file) as f:
+        nested_proq_files = NestedContent[str|ProQ].model_validate(yaml.safe_load(f))
+
+    def load_nested_proq_files(nested_proq_files: NestedContent[str]):
+        """Loads the nested Proqs inplace recursively."""
+        if isinstance(nested_proq_files.content, str):
+            nested_proq_files.content = load_proq_from_file(
+                os.path.join(
+                    os.path.dirname(os.path.abspath(yaml_file)),
+                    nested_proq_files.content,
+                )
+            )
+        else:
+            for content in nested_proq_files.content:
+                load_nested_proq_files(content)
+
+    load_nested_proq_files(nested_proq_files)
+    return NestedContent[ProQ].model_validate(nested_proq_files.model_dump())
