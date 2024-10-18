@@ -38,18 +38,20 @@ def proq_export(proq_file, output_file=None, format="json", show_hidden_suffix=F
         # infer format if output filename is given
         format = output_file.split('.')[-1]
 
-    proq_file_format = proq_file.split(".")[-1]
-    if proq_file_format == "yaml":
+    is_nested_proq = proq_file.split(".")[-1] == "yaml"
+    if is_nested_proq:
         nested_proq = load_nested_proq_from_file(proq_file)
     else:
-        nested_proq = load_proq_from_file(proq_file)
-        nested_proq = NestedContent[ProQ](title=nested_proq.title, content=nested_proq)
-
+        proq = load_proq_from_file(proq_file)
+        nested_proq = NestedContent[ProQ](title=proq.title, content=proq)
 
     with open(output_file, "w") as f:
         match format:
             case "json":
-                f.write(nested_proq.model_dump_json(indent=2))
+                if is_nested_proq:
+                    f.write(nested_proq.model_dump_json(indent=2))
+                else:
+                    f.write(proq.model_dump_json(indent=2))
             case "html":
                 f.write(get_rendered_html(nested_proq,show_hidden_suffix))
             case "pdf":
