@@ -134,7 +134,7 @@ def load_nested_proq_from_file(yaml_file) -> NestedContent[ProQ]:
     Loads a nested content structure with proqs at leaf nodes.
     """
     with open(yaml_file) as f:
-        nested_proq_files = NestedContent[str|ProQ].model_validate(yaml.safe_load(f))
+        nested_proq_files = NestedContent[str | ProQ].model_validate(yaml.safe_load(f))
 
     def load_nested_proq_files(nested_proq_files: NestedContent[str]):
         """Loads the nested Proqs inplace recursively."""

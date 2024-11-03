@@ -3,15 +3,20 @@ name = "proq"
 version = "0.0.2"
 description = "A command-line based tool for authoring programming questions at scale."
 readme = "README.md"
-requires-python = ">=3.7"
-license = {file = "LICENSE.txt"}
+requires-python = ">=3.10"
+license = { file = "LICENSE.txt" }
 
-authors = [
-  {name = "Livin Nector", email = "livinnector2001@gmail.com" }
-]
+authors = [{ name = "Livin Nector", email = "livinnector2001@gmail.com" }]
 
 dependencies = [
-  "markdown-to-json","pyyaml","pydantic","bs4", "marko","Jinja2","playwright"
+  "markdown-to-json",
+  "pyyaml",
+  "pydantic",
+  "bs4",
+  "marko",
+  "Jinja2",
+  "playwright",
+  "strenum>=0.4.15",
 ]
 
 [project.optional-dependencies]
@@ -28,3 +33,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.package-data]
 "proq.templates" = ["*"]
 "proq.data" = ["*"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.7.2",
+]

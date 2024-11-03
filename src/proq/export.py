@@ -5,7 +5,7 @@ from playwright.async_api import async_playwright
 
 from .template_utils import package_env
 from .parse import load_proq_from_file, load_nested_proq_from_file
-from .models import NestedContent,ProQ
+from .models import NestedContent, ProQ
 
 OUTPUT_FORMATS = ["json", "html", "pdf"]
 
@@ -19,13 +19,14 @@ async def print_html_to_pdf(html_content, output_pdf_path):
         await page.pdf(path=output_pdf_path, print_background=True)
         await browser.close()
 
-def get_rendered_html(nested_proq,show_hidden_suffix):
-    return package_env.get_template(
-        "proq_export_template.html.jinja"
-    ).render(nested_proq=nested_proq, show_hidden_suffix=show_hidden_suffix)
+
+def get_rendered_html(nested_proq, show_hidden_suffix):
+    return package_env.get_template("proq_export_template.html.jinja").render(
+        nested_proq=nested_proq, show_hidden_suffix=show_hidden_suffix
+    )
+
 
 def proq_export(proq_file, output_file=None, format="json", show_hidden_suffix=False):
-
     if not os.path.isfile(proq_file):
         raise FileNotFoundError(f"{proq_file} is not a valid file")
 
@@ -36,7 +37,7 @@ def proq_export(proq_file, output_file=None, format="json", show_hidden_suffix=F
         output_file = ".".join(proq_file.split(".")[:-1]) + f".{format}"
     else:
         # infer format if output filename is given
-        format = output_file.split('.')[-1]
+        format = output_file.split(".")[-1]
 
     is_nested_proq = proq_file.split(".")[-1] == "yaml"
     if is_nested_proq:
@@ -53,7 +54,7 @@ def proq_export(proq_file, output_file=None, format="json", show_hidden_suffix=F
                 else:
                     f.write(proq.model_dump_json(indent=2))
             case "html":
-                f.write(get_rendered_html(nested_proq,show_hidden_suffix))
+                f.write(get_rendered_html(nested_proq, show_hidden_suffix))
             case "pdf":
                 asyncio.run(
                     print_html_to_pdf(

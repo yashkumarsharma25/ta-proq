@@ -1,7 +1,6 @@
 import re
 import difflib
 import json
-import proq.data
 from importlib.resources import files
 
 from pydantic import (
@@ -13,11 +12,11 @@ from pydantic import (
     field_validator,
 )
 from typing import Generic, TypeVar, Annotated
-from enum import StrEnum
+from strenum import StrEnum
 
 # curl https://emkc.org/api/v2/piston/runtimes | jq "sort_by(.language)| map({language: .language, aliases: .aliases})" > runtimes.json
-# langs and aliases taken from piston 
-runtimes = json.loads(files(proq.data).joinpath("runtimes.json").read_text())
+# langs and aliases taken from piston
+runtimes = json.loads(files("proq.data").joinpath("runtimes.json").read_text())
 lang_code = {runtime["language"]: runtime["language"] for runtime in runtimes} | {
     alias: runtime["language"] for runtime in runtimes for alias in runtime["aliases"]
 }

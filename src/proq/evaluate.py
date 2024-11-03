@@ -113,18 +113,17 @@ def evaluate_proq(proq: ProQ, verbose=False) -> dict[str, ProqChecks]:
     proq_check = ProqChecks(solution_checks=True, template_checks=not template_passed)
 
     if verbose:
-        print(
-            f"\033[0;1mTemplate Check:\033[0m {'\033[0;32mPassed\033[0m' if proq_check.template_checks else '\033[0;31mFailed\033[0m'}"
+        status = (
+            "\033[0;32mPassed\033[0m"
+            if proq_check.template_checks
+            else "\033[0;31mFailed\033[0m"
         )
+        print(f"\033[0;1mTemplate Check:\033[0m {status}")
         if not proq_check.template_checks:
             print(f"Public Testcases : {sum(template_public_results)} Passed")
             print(f"Private Testcases : {sum(template_private_results)} Passed")
 
     return proq_check
-
-
-import os
-import argparse
 
 
 def evaluate_proq_files(files, verbose=True):
