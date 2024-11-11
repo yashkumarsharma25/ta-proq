@@ -1,17 +1,17 @@
-import re
 import difflib
 import json
+import re
 from importlib.resources import files
+from typing import Annotated, Generic, TypeVar
 
 from pydantic import (
-    BaseModel,
     AliasChoices,
-    Field,
+    BaseModel,
     BeforeValidator,
+    Field,
     computed_field,
     field_validator,
 )
-from typing import Generic, TypeVar, Annotated
 from strenum import StrEnum
 
 # curl https://emkc.org/api/v2/piston/runtimes | jq "sort_by(.language)| map({language: .language, aliases: .aliases})" > runtimes.json
@@ -47,11 +47,12 @@ class Solution(BaseModel):
     )
     suffix: str = Field(default="", description="The suffix of the solution")
     suffix_invisible: str = Field(
+        default="",
         validation_alias=AliasChoices("suffix_invisible", "invisible_suffix"),
         description="The invisible part of the suffix that comes after suffix",
     )
     lang: ProgLang = "python"
-    execute_config: ExecuteConfig | None
+    execute_config: ExecuteConfig | None = Field(default_factory=ExecuteConfig)
 
     @computed_field(return_type=str)
     @property
@@ -95,6 +96,19 @@ class ProQ(BaseModel):
     def remove_duplicates(cls, word):
         """Removes multiple spaces and strips whitespace in beginning and end."""
         return re.sub(re.compile(r"\s+"), " ", word).strip()
+
+    @classmethod
+    def default_proq(cls):
+        return cls(
+            title="Sample Title",
+            statement="Sample Problem statment",
+            public_testcases=[TestCase(input="a", output="a")],
+            private_testcases=[TestCase(input="a", output="a")],
+            solution=Solution(
+                solution="print(input())",
+                lang="python",
+            ),
+        )
 
 
 DataT = TypeVar("DataT")
