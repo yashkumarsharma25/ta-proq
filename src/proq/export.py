@@ -12,7 +12,7 @@ OUTPUT_FORMATS = ["json", "html", "pdf"]
 
 async def print_html_to_pdf(html_content, output_pdf_path):
     async with async_playwright() as p:
-        browser = await p.chromium.launch()
+        browser = await p.chromium.launch(channel='chrome')
         context = await browser.new_context()
         page = await context.new_page()
         await page.set_content(html_content)
