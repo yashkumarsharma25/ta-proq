@@ -2,7 +2,7 @@ import difflib
 import json
 import re
 from importlib.resources import files
-from typing import Annotated, Generic, TypeVar, Literal
+from typing import Annotated, Generic, Literal, TypeVar
 
 from pydantic import (
     AliasChoices,
@@ -147,7 +147,7 @@ class Solution(BaseModel):
 
     @property
     def template_code(self):
-        """The complete template code with all prefix and suffix attached"""
+        """The complete template code with all prefix and suffix attached."""
         return "".join([self.prefix, self.template, self.suffix, self.suffix_invisible])
 
     @property
@@ -161,7 +161,7 @@ class Solution(BaseModel):
 
 
 class ProQ(BaseModel):
-    """Pydantic model for a Programming Question (ProQ)"""
+    """Pydantic model for a Programming Question (ProQ)."""
 
     title: str | None = Field(validation_alias="Title", description="Title")
     statement: str = Field(
