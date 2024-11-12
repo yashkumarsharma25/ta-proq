@@ -1,8 +1,11 @@
-import os
 import argparse
+import os
 import subprocess
 from collections import namedtuple
 from tempfile import TemporaryDirectory
+
+from termcolor import colored, cprint
+
 from .models import ProQ, TestCase
 from .parse import load_proq_from_file
 
@@ -15,8 +18,7 @@ def write_to_file(content, file_name):
 
 
 def build(build_command) -> bool:
-    """
-    Builds with the given build command.
+    """Builds with the given build command.
 
     Args:
         build_command : str - build command to run in a subprocess
@@ -52,8 +54,9 @@ def check_testcases(run_command: str, testcases: list[TestCase], verbose=False):
         results.append(passed)
 
         if verbose:
-            print(
-                f"\033[0;{'32mTest case passed' if passed else '31mTest case failed'} {i}\033[0m"
+            cprint(
+                f"Test case passed{i}" if passed else f"Test case failed {i}",
+                color="green" if passed else "red",
             )
             if not passed:
                 print(
@@ -74,22 +77,22 @@ def evaluate_proq(proq: ProQ, verbose=False) -> dict[str, ProqChecks]:
     run_command = proq.solution.execute_config.run
 
     if verbose:
-        print(f"Title: \033[0;1m{proq.title}\033[0m")
+        print("Title:", colored(proq.title, attrs=["bold"]))
 
     # Write solution code and build
     write_to_file(proq.solution.solution_code, source_filename)
     if build_command and not build(build_command):
         if verbose:
-            print("\033[0;31mBuild Failed\033[0m")
+            cprint("Build Failed", color="red", attrs=["bold"])
         return ProqChecks(solution_checks=False, template_checks=False)
 
     # Test solution with public and private test cases
     if verbose:
-        print("\033[0;1mPublic Testcases\033[0m")
+        cprint("Public Testcases", attrs=["bold"])
     public_results = check_testcases(run_command, proq.public_testcases, verbose)
 
     if verbose:
-        print("\033[0;1mPrivate Testcases\033[0m")
+        cprint("Private Testcases", attrs=["bold"])
     private_results = check_testcases(run_command, proq.private_testcases, verbose)
 
     if not all(public_results + private_results):
@@ -99,26 +102,24 @@ def evaluate_proq(proq: ProQ, verbose=False) -> dict[str, ProqChecks]:
     write_to_file(proq.solution.template_code, source_filename)
     if build_command and not build(build_command):
         if verbose:
-            print("Template: \033[0;33mBuild Failed\033[0m")
+            print("Template:", colored("Build Failed", color="green"))
         return ProqChecks(solution_checks=True, template_checks=True)
 
     # Test template with public and private test cases
     template_public_results = check_testcases(run_command, proq.public_testcases)
     template_private_results = check_testcases(run_command, proq.private_testcases)
 
-    template_passed = build_command and any(
-        template_public_results + template_private_results
-    )
+    template_passed = any(template_public_results + template_private_results)
 
     proq_check = ProqChecks(solution_checks=True, template_checks=not template_passed)
 
     if verbose:
         status = (
-            "\033[0;32mPassed\033[0m"
+            colored("Passed", color="green")
             if proq_check.template_checks
-            else "\033[0;31mFailed\033[0m"
+            else colored("Failed", color="red")
         )
-        print(f"\033[0;1mTemplate Check:\033[0m {status}")
+        print(colored("Template Check:", attrs=["bold"]), status)
         if not proq_check.template_checks:
             print(f"Public Testcases : {sum(template_public_results)} Passed")
             print(f"Private Testcases : {sum(template_private_results)} Passed")

@@ -17,6 +17,7 @@ dependencies = [
   "Jinja2",
   "playwright",
   "strenum>=0.4.15",
+  "termcolor>=2.5.0",
 ]
 
 [project.optional-dependencies]
@@ -35,6 +36,17 @@ build-backend = "setuptools.build_meta"
 "proq.data" = ["*"]
 
 [dependency-groups]
-dev = [
-    "ruff>=0.7.2",
-]
+dev = ["ruff>=0.7.2"]
+
+[tool.ruff]
+extend-include = ["*.ipynb"]
+
+line-length = 88
+
+[tool.ruff.lint]
+select = ["F", "E", "I", "W", "N", "D"]
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"]
+
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
