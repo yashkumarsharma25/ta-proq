@@ -40,7 +40,6 @@ dev = ["ruff>=0.7.2"]
 
 [tool.ruff]
 extend-include = ["*.ipynb"]
-
 line-length = 88
 
 [tool.ruff.lint]

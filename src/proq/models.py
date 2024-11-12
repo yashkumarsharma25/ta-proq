@@ -12,7 +12,10 @@ from pydantic import (
     field_validator,
 )
 
-# curl https://emkc.org/api/v2/piston/runtimes | jq "sort_by(.language)| map({language: .language, aliases: .aliases})" > runtimes.json
+# curl https://emkc.org/api/v2/piston/runtimes | \
+#   jq "sort_by(.language)| map({language: .language, aliases: .aliases})" \
+#   > runtimes.json
+
 # langs and aliases taken from piston
 runtimes = json.loads(files("proq.data").joinpath("runtimes.json").read_text())
 lang_code = {runtime["language"]: runtime["language"] for runtime in runtimes} | {

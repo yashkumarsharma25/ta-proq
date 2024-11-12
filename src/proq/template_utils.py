@@ -1,6 +1,7 @@
 import os
+
+from jinja2 import Environment, FunctionLoader, PackageLoader, select_autoescape
 from marko.ext.gfm import gfm
-from jinja2 import Environment, PackageLoader, FunctionLoader, select_autoescape
 
 package_env = Environment(
     loader=PackageLoader("proq", "templates"), autoescape=select_autoescape()

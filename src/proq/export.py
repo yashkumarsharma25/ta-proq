@@ -1,18 +1,19 @@
-import os
 import argparse
 import asyncio
+import os
+
 from playwright.async_api import async_playwright
 
-from .template_utils import package_env
-from .parse import load_proq_from_file, load_nested_proq_from_file
 from .models import NestedContent, ProQ
+from .parse import load_nested_proq_from_file, load_proq_from_file
+from .template_utils import package_env
 
 OUTPUT_FORMATS = ["json", "html", "pdf"]
 
 
 async def print_html_to_pdf(html_content, output_pdf_path):
     async with async_playwright() as p:
-        browser = await p.chromium.launch(channel='chrome')
+        browser = await p.chromium.launch(channel="chrome")
         context = await browser.new_context()
         page = await context.new_page()
         await page.set_content(html_content)
@@ -31,9 +32,10 @@ def proq_export(proq_file, output_file=None, format="json", show_hidden_suffix=F
         raise FileNotFoundError(f"{proq_file} is not a valid file")
 
     if not output_file:
-        assert (
-            format in OUTPUT_FORMATS
-        ), f"Export format not valid. Supported formats are {', '.join(OUTPUT_FORMATS[:-1])} and {OUTPUT_FORMATS[-1]}."
+        assert format in OUTPUT_FORMATS, (
+            "Export format not valid. Supported formats are "
+            f"{', '.join(OUTPUT_FORMATS[:-1])} and {OUTPUT_FORMATS[-1]}."
+        )
         output_file = ".".join(proq_file.split(".")[:-1]) + f".{format}"
     else:
         # infer format if output filename is given

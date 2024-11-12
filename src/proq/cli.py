@@ -1,7 +1,6 @@
 import argparse
-from . import create
-from . import evaluate
-from . import export
+
+from . import create, evaluate, export
 
 
 def main():

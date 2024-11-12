@@ -1,23 +1,22 @@
+import argparse
 import os
 import re
-import yaml
-import argparse
 import shlex
 
+import yaml
 from marko import Markdown
+
 from md2json import dictify
 
+from .models import NestedContent, ProQ
 from .template_utils import get_relative_env
-from .models import ProQ, NestedContent
 
 
 def clip_extra_lines(text: str) -> str:
-    """
-    Reduces sequences of more than two consecutive line breaks
-    to exactly two line breaks.
+    """Reduces multiple consecutive line breaks to exactly two line breaks.
+
     Also strip blank lines in the beginning and end.
     """
-
     text = re.sub(r"\n\s*\n", "\n\n", text, flags=re.DOTALL).lstrip("\n")
     text = re.sub(r"\s*\n\s*$", "\n", text, flags=re.DOTALL)
     return text
@@ -25,7 +24,9 @@ def clip_extra_lines(text: str) -> str:
 
 def get_tag_content(tag: str, html: str) -> str:
     """Get the inner html of first match of a tag.
-    Returns empty string if tag not found
+
+    Returns:
+        Inner html if tag found else empty string
     """
     content = re.findall(f"<{re.escape(tag)}>(.*?)</{re.escape(tag)}>", html, re.DOTALL)
     content = clip_extra_lines(content[0]) if content else ""
@@ -115,7 +116,7 @@ def extract_testcases(testcases_dict):
 
 
 def load_proq_from_file(proq_file) -> ProQ:
-    """Loads the proq file and returns a Proq"""
+    """Loads the proq file and returns a Proq."""
     md_file = (
         get_relative_env(proq_file).get_template(os.path.basename(proq_file)).render()
     )
@@ -130,9 +131,7 @@ def load_proq_from_file(proq_file) -> ProQ:
 
 
 def load_nested_proq_from_file(yaml_file) -> NestedContent[ProQ]:
-    """
-    Loads a nested content structure with proqs at leaf nodes.
-    """
+    """Loads a nested content structure with proqs at leaf nodes."""
     with open(yaml_file) as f:
         nested_proq_files = NestedContent[str | ProQ].model_validate(yaml.safe_load(f))
 
