@@ -2,17 +2,15 @@ import difflib
 import json
 import re
 from importlib.resources import files
-from typing import Annotated, Generic, TypeVar
+from typing import Annotated, Generic, TypeVar, Literal
 
 from pydantic import (
     AliasChoices,
     BaseModel,
     BeforeValidator,
     Field,
-    computed_field,
     field_validator,
 )
-from strenum import StrEnum
 
 # curl https://emkc.org/api/v2/piston/runtimes | jq "sort_by(.language)| map({language: .language, aliases: .aliases})" > runtimes.json
 # langs and aliases taken from piston
@@ -20,9 +18,97 @@ runtimes = json.loads(files("proq.data").joinpath("runtimes.json").read_text())
 lang_code = {runtime["language"]: runtime["language"] for runtime in runtimes} | {
     alias: runtime["language"] for runtime in runtimes for alias in runtime["aliases"]
 }
-prog_langs = list({runtime["language"] for runtime in runtimes})
 ProgLang = Annotated[
-    StrEnum("ProgLangs", prog_langs), BeforeValidator(lambda x: lang_code[x])
+    Literal[
+        "awk",
+        "bash",
+        "basic",
+        "basic.net",
+        "befunge93",
+        "bqn",
+        "brachylog",
+        "brainfuck",
+        "c",
+        "c++",
+        "cjam",
+        "clojure",
+        "cobol",
+        "coffeescript",
+        "cow",
+        "crystal",
+        "csharp",
+        "csharp.net",
+        "d",
+        "dart",
+        "dash",
+        "dragon",
+        "elixir",
+        "emacs",
+        "emojicode",
+        "erlang",
+        "file",
+        "forte",
+        "forth",
+        "fortran",
+        "freebasic",
+        "fsharp.net",
+        "fsi",
+        "go",
+        "golfscript",
+        "groovy",
+        "haskell",
+        "husk",
+        "iverilog",
+        "japt",
+        "java",
+        "javascript",
+        "javascript",
+        "jelly",
+        "julia",
+        "kotlin",
+        "lisp",
+        "llvm_ir",
+        "lolcode",
+        "lua",
+        "matl",
+        "matl",
+        "nasm",
+        "nasm64",
+        "nim",
+        "ocaml",
+        "octave",
+        "osabie",
+        "paradoc",
+        "pascal",
+        "perl",
+        "php",
+        "ponylang",
+        "powershell",
+        "prolog",
+        "pure",
+        "pyth",
+        "python",
+        "python2",
+        "racket",
+        "raku",
+        "retina",
+        "rockstar",
+        "rscript",
+        "ruby",
+        "rust",
+        "samarium",
+        "scala",
+        "smalltalk",
+        "sqlite3",
+        "swift",
+        "typescript",
+        "typescript",
+        "vlang",
+        "vyxal",
+        "yeethon",
+        "zig",
+    ],
+    BeforeValidator(lambda x: lang_code[x]),
 ]
 
 
@@ -51,16 +137,14 @@ class Solution(BaseModel):
         validation_alias=AliasChoices("suffix_invisible", "invisible_suffix"),
         description="The invisible part of the suffix that comes after suffix",
     )
-    lang: ProgLang = "python"
-    execute_config: ExecuteConfig | None = Field(default_factory=ExecuteConfig)
+    lang: ProgLang = Field(default="python")
+    execute_config: ExecuteConfig | None
 
-    @computed_field(return_type=str)
     @property
     def solution_code(self):
         """The complete solution code with all prefix and suffix attached."""
         return "".join([self.prefix, self.solution, self.suffix, self.suffix_invisible])
 
-    @computed_field(return_type=str)
     @property
     def template_code(self):
         """The complete template code with all prefix and suffix attached"""
@@ -81,7 +165,8 @@ class ProQ(BaseModel):
 
     title: str | None = Field(validation_alias="Title", description="Title")
     statement: str = Field(
-        validation_alias="Problem Statement", description="The problem statement"
+        validation_alias="Problem Statement",
+        description="The problem statement with example and explanation",
     )
     public_testcases: list[TestCase] = Field(validation_alias="Public Test Cases")
     private_testcases: list[TestCase] = Field(validation_alias="Private Test Cases")
