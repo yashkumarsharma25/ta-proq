@@ -141,7 +141,7 @@ class Solution(BaseModel):
         description="The invisible part of the suffix that comes after suffix",
     )
     lang: ProgLang = Field(default="python")
-    execute_config: ExecuteConfig | None
+    execute_config: ExecuteConfig | None = Field(default_factory=ExecuteConfig)
 
     @property
     def solution_code(self):
