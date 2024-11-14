@@ -1,15 +1,8 @@
 import argparse
-import os
 import re
 import shlex
 
-import yaml
 from marko import Markdown
-
-from md2json import dictify
-
-from .models import NestedContent, ProQ
-from .template_utils import get_relative_env
 
 
 def clip_extra_lines(text: str) -> str:
@@ -115,38 +108,3 @@ def extract_testcases(testcases_dict):
     ]
 
 
-def load_proq_from_file(proq_file) -> ProQ:
-    """Loads the proq file and returns a Proq."""
-    md_file = (
-        get_relative_env(proq_file).get_template(os.path.basename(proq_file)).render()
-    )
-    yaml_header, md_string = md_file.split("---", 2)[1:]
-    yaml_header = yaml.safe_load(yaml_header)
-    proq = dictify(md_string)
-    proq["Solution"] = extract_solution(proq["Solution"])
-    proq["Public Test Cases"] = extract_testcases(proq["Public Test Cases"])
-    proq["Private Test Cases"] = extract_testcases(proq["Private Test Cases"])
-    proq.update(yaml_header)
-    return ProQ.model_validate(proq)
-
-
-def load_nested_proq_from_file(yaml_file) -> NestedContent[ProQ]:
-    """Loads a nested content structure with proqs at leaf nodes."""
-    with open(yaml_file) as f:
-        nested_proq_files = NestedContent[str | ProQ].model_validate(yaml.safe_load(f))
-
-    def load_nested_proq_files(nested_proq_files: NestedContent[str]):
-        """Loads the nested Proqs inplace recursively."""
-        if isinstance(nested_proq_files.content, str):
-            nested_proq_files.content = load_proq_from_file(
-                os.path.join(
-                    os.path.dirname(os.path.abspath(yaml_file)),
-                    nested_proq_files.content,
-                )
-            )
-        else:
-            for content in nested_proq_files.content:
-                load_nested_proq_files(content)
-
-    load_nested_proq_files(nested_proq_files)
-    return NestedContent[ProQ].model_validate(nested_proq_files.model_dump())

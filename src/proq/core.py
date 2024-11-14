@@ -1,118 +1,16 @@
 import difflib
-import json
+import os
 import re
-from importlib.resources import files
-from typing import Annotated, Generic, Literal, TypeVar
+from typing import Generic, TypeVar
 
-from pydantic import (
-    AliasChoices,
-    BaseModel,
-    BeforeValidator,
-    Field,
-    field_validator,
-)
+import yaml
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
-# curl https://emkc.org/api/v2/piston/runtimes | \
-#   jq "sort_by(.language)| map({language: .language, aliases: .aliases})" \
-#   > runtimes.json
+from md2json import dictify
 
-# langs and aliases taken from piston
-runtimes = json.loads(files("proq.data").joinpath("runtimes.json").read_text())
-lang_code = {runtime["language"]: runtime["language"] for runtime in runtimes} | {
-    alias: runtime["language"] for runtime in runtimes for alias in runtime["aliases"]
-}
-ProgLang = Annotated[
-    Literal[
-        "awk",
-        "bash",
-        "basic",
-        "basic.net",
-        "befunge93",
-        "bqn",
-        "brachylog",
-        "brainfuck",
-        "c",
-        "c++",
-        "cjam",
-        "clojure",
-        "cobol",
-        "coffeescript",
-        "cow",
-        "crystal",
-        "csharp",
-        "csharp.net",
-        "d",
-        "dart",
-        "dash",
-        "dragon",
-        "elixir",
-        "emacs",
-        "emojicode",
-        "erlang",
-        "file",
-        "forte",
-        "forth",
-        "fortran",
-        "freebasic",
-        "fsharp.net",
-        "fsi",
-        "go",
-        "golfscript",
-        "groovy",
-        "haskell",
-        "husk",
-        "iverilog",
-        "japt",
-        "java",
-        "javascript",
-        "javascript",
-        "jelly",
-        "julia",
-        "kotlin",
-        "lisp",
-        "llvm_ir",
-        "lolcode",
-        "lua",
-        "matl",
-        "matl",
-        "nasm",
-        "nasm64",
-        "nim",
-        "ocaml",
-        "octave",
-        "osabie",
-        "paradoc",
-        "pascal",
-        "perl",
-        "php",
-        "ponylang",
-        "powershell",
-        "prolog",
-        "pure",
-        "pyth",
-        "python",
-        "python2",
-        "racket",
-        "raku",
-        "retina",
-        "rockstar",
-        "rscript",
-        "ruby",
-        "rust",
-        "samarium",
-        "scala",
-        "smalltalk",
-        "sqlite3",
-        "swift",
-        "typescript",
-        "typescript",
-        "vlang",
-        "vyxal",
-        "yeethon",
-        "zig",
-    ],
-    BeforeValidator(lambda x: lang_code[x]),
-]
+from .parse import extract_solution, extract_testcases
+from .prog_langs import ProgLang
+from .template_utils import get_relative_env
 
 
 class TestCase(BaseModel):
@@ -175,9 +73,7 @@ class ProQ(BaseModel):
     private_testcases: list[TestCase] = Field(validation_alias="Private Test Cases")
     solution: Solution = Field(validation_alias="Solution", description="The solution")
 
-    class Config:
-        validate_assignment = True
-        populate_by_name = True
+    model_config = ConfigDict(validate_assignment=True, populate_by_name=True)
 
     @field_validator("title")
     @classmethod
@@ -198,6 +94,61 @@ class ProQ(BaseModel):
             ),
         )
 
+    @classmethod
+    def from_file(cls, proq_file):
+        """Loads the proq file and returns a Proq.
+
+        A Proq File is a structured markdown-jinja template file with the yaml header
+        and following first level headings.
+            - Problem Statement
+            - Solution
+            - Test Cases
+
+        The jinja environment is a special environment with relative includes.
+        where all the paths are relative to the proq file.
+
+        The "Problem Statement has the statement of the problem.
+
+        The "Solution" has a markdown code block with special html-like tags
+        annotating different parts of the solution including.
+            - <prefix>...</prefix> - The non-editable part at the start of the code.
+            - <template>...</template> - The editable part.
+                It has two sub tags that can be used within.
+                - <solution>...</solution> or <sol>...</sol>
+                    Contains the part which should only be the part of
+                    the solution not the template.
+                - <los>...</los>
+                    Contains the part which should only be the part of
+                    the template not the solution.
+            - <suffix>...</suffix>
+                The non-editable part comes after the template part.
+            - <suffix_invisible>...</suffix_invisible>
+                The non-editable part which is not visible.
+
+        The language part of the code block will have additional
+        execute args for building and running the script.
+
+        The "Test Cases" section will have alternative input and output second level
+        headings with a markdown code block having the input and output.
+
+        """
+        if not os.path.isfile(proq_file):
+            raise FileNotFoundError(f"File {proq_file} does not exists.")
+
+        md_file = (
+            get_relative_env(proq_file)
+            .get_template(os.path.basename(proq_file))
+            .render()
+        )
+        yaml_header, md_string = md_file.split("---", 2)[1:]
+        yaml_header = yaml.safe_load(yaml_header)
+        proq = dictify(md_string)
+        proq["Solution"] = extract_solution(proq["Solution"])
+        proq["Public Test Cases"] = extract_testcases(proq["Public Test Cases"])
+        proq["Private Test Cases"] = extract_testcases(proq["Private Test Cases"])
+        proq.update(yaml_header)
+        return cls.model_validate(proq)
+
 
 DataT = TypeVar("DataT")
 
@@ -205,3 +156,25 @@ DataT = TypeVar("DataT")
 class NestedContent(BaseModel, Generic[DataT]):
     title: str
     content: list["NestedContent[DataT]"] | DataT
+
+
+def load_nested_proq_from_file(yaml_file) -> NestedContent[ProQ]:
+    """Loads a nested content structure with proqs at leaf nodes."""
+    with open(yaml_file) as f:
+        nested_proq_files = NestedContent[str | ProQ].model_validate(yaml.safe_load(f))
+
+    def load_nested_proq_files(nested_proq_files: NestedContent[str]):
+        """Loads the nested Proqs inplace recursively."""
+        if isinstance(nested_proq_files.content, str):
+            nested_proq_files.content = ProQ.from_file(
+                os.path.join(
+                    os.path.dirname(os.path.abspath(yaml_file)),
+                    nested_proq_files.content,
+                )
+            )
+        else:
+            for content in nested_proq_files.content:
+                load_nested_proq_files(content)
+
+    load_nested_proq_files(nested_proq_files)
+    return NestedContent[ProQ].model_validate(nested_proq_files.model_dump())

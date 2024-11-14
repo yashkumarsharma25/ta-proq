@@ -4,8 +4,7 @@ import os
 
 from playwright.async_api import async_playwright
 
-from .models import NestedContent, ProQ
-from .parse import load_nested_proq_from_file, load_proq_from_file
+from .core import NestedContent, ProQ, load_nested_proq_from_file
 from .template_utils import package_env
 
 OUTPUT_FORMATS = ["json", "html", "pdf"]
@@ -29,8 +28,7 @@ def get_rendered_html(nested_proq, show_hidden_suffix):
 
 def proq_export(proq_file, output_file=None, format="json", show_hidden_suffix=False):
     if not os.path.isfile(proq_file):
-        raise FileNotFoundError(f"{proq_file} is not a valid file")
-
+        raise FileNotFoundError(f"File {proq_file} does not exists.")
     if not output_file:
         assert format in OUTPUT_FORMATS, (
             "Export format not valid. Supported formats are "
@@ -45,7 +43,7 @@ def proq_export(proq_file, output_file=None, format="json", show_hidden_suffix=F
     if is_nested_proq:
         nested_proq = load_nested_proq_from_file(proq_file)
     else:
-        proq = load_proq_from_file(proq_file)
+        proq = ProQ.from_file(proq_file)
         nested_proq = NestedContent[ProQ](title=proq.title, content=proq)
 
     with open(output_file, "w") as f:

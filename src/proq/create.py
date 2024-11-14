@@ -2,7 +2,7 @@
 import argparse
 import os
 
-from .models import ExecuteConfig
+from .core import ExecuteConfig
 from .template_utils import package_env
 
 default_lang_execute_config = {

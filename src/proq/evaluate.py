@@ -6,8 +6,7 @@ from tempfile import TemporaryDirectory
 
 from termcolor import colored, cprint
 
-from .models import ProQ, TestCase
-from .parse import load_proq_from_file
+from .core import ProQ, TestCase
 
 ProqChecks = namedtuple("ProqChecks", ["solution_checks", "template_checks"])
 
@@ -133,7 +132,7 @@ def evaluate_proq_files(files, verbose=True):
             print(f"{file_path} is not a valid file")
             continue
         print(f"Evaluating file {file_path}")
-        proq = load_proq_from_file(file_path)
+        proq = ProQ.from_file(file_path)
         curdir = os.path.abspath(os.curdir)
         with TemporaryDirectory() as tempdirname:
             os.chdir(tempdirname)
