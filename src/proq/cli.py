@@ -1,5 +1,7 @@
 import argparse
 
+from termcolor import colored
+
 from . import create, evaluate, export
 
 
@@ -12,7 +14,7 @@ def main():
 
     # Create the subparsers
     subparsers = parser.add_subparsers(
-        title="\033[1mCommands\033[0m", dest="command", metavar="COMMAND"
+        title=colored("Commands", attrs=["bold"]), dest="command", metavar="COMMAND"
     )
 
     parser_template = subparsers.add_parser(
@@ -25,7 +27,7 @@ def main():
     )
     evaluate.configure_cli_parser(parser_evaluate)
 
-    parser_export = subparsers.add_parser("export", help="Export to JSON or HTML")
+    parser_export = subparsers.add_parser("export", help="Export to JSON,HTML or PDF")
     export.conifgure_cli_parser(parser_export)
 
     # Parse the arguments
