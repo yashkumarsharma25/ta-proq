@@ -1,7 +1,18 @@
+@page {
+  size: A4;
+  margin: 1cm;
+}
+
 body {
   font-family: Arial, sans-serif;
   line-height: 1.5;
   padding: 5px;
+  max-width: 992px;
+  margin: auto;
+}
+
+.no-break {
+  page-break-inside: avoid;
 }
 
 h1 {
@@ -39,10 +50,7 @@ pre {
   }
 }
 
-@page {
-  size: A4;
-  margin: 0.5in;
-}
+
 
 .prob-statement {
   font-family: "Roboto", Arial, Helvetica, sans-serif;

@@ -7,7 +7,6 @@ set diff_color = {
 }
 %}
 
-
 {%macro render_proq(title, proq, depth=1)%}
 <div class="problem">
     <h{{depth}}>{{ title }}</h{{depth}}>
@@ -15,22 +14,69 @@ set diff_color = {
         {{ proq.statement | gfm}}
     </div>
     <div style="display: flex; flex-direction: row; flex-wrap:wrap; gap: 20px;">
-        <div style="flex: content;">
+        {%set has_template = proq.solution.template_code.strip()%}
+        {%if has_template%}
+        <div class='no-break' style="flex: content;">
             <h{{depth+1}}>Code Template</h{{depth+1}}>
-            <pre
-                class="solution">{%if proq.solution.prefix.strip() %}<code class="dim lang-{{proq.lang}}">{{proq.solution.prefix|e}}</code>{% endif %}<code class="lang-{{proq.lang}}">{{ proq.solution.template | e }}</code>{%if proq.solution.suffix.strip() %}<code class="dim lang-{{proq.lang}}">{{proq.solution.suffix | e}}</code>{% endif%}</pre>
+            <pre class="solution">
+                {%-if proq.solution.prefix.strip() -%}
+                    <code class="dim lang-{{proq.lang}}">
+                    {{- proq.solution.prefix|e -}}
+                    </code>
+                {%- endif -%}
+                <code class="lang-{{proq.lang}}">
+                {{- proq.solution.template | e -}}
+                </code>
+                {%-if proq.solution.suffix.strip() -%}
+                    <code class="dim lang-{{proq.lang}}">
+                    {{-proq.solution.suffix | e -}}
+                    </code>
+                {%- endif -%}
+            </pre>
         </div>
-        <div style="flex: content;">
+        {%endif%}
+        <div class='no-break' style="flex: content;">
             <h{{depth+1}}>Solution</h{{depth+1}}>
-            <pre
-                class="solution">{%if proq.solution.prefix.strip() %}<code class="dim lang-{{proq.lang}}">{{proq.solution.prefix | e}}</code>{% endif %}<code class="lang-{{proq.lang}}">{{ proq.solution.solution | e }}</code>{%if proq.solution.suffix.strip() %}<code class="dim lang-{{proq.lang}}">{{proq.solution.suffix | e}}</code>{% endif%}</pre>
+            <pre class="solution">
+            {%-if proq.solution.prefix.strip() -%}
+                <code class="dim lang-{{proq.lang}}">
+                {{- proq.solution.prefix|e -}}
+                </code>
+            {%- endif -%}
+            <code class="lang-{{proq.lang}}">
+            {{- proq.solution.solution | e -}}
+            </code>
+            {%-if proq.solution.suffix.strip() -%}
+                <code class="dim lang-{{proq.lang}}">
+                {{-proq.solution.suffix | e -}}
+                </code>
+            {%- endif -%}
+        </pre>
         </div>
-        <div style="flex: content;">
+        {%if has_template%}
+        <div class='no-break' style="flex: content;">
             <h{{depth+1}}>Template - Solution Diff</h{{depth+1}}>
-            <pre
-                class="solution">{%if proq.solution.prefix.strip() %}<code class="dim lang-{{proq.lang}}">{{proq.solution.prefix | e}}</code>{% endif %}<output style="padding-block:1rem">{%for diff in proq.solution.template_solution_diff%}<span style="background:{{diff_color[diff[:2]]}}">{{diff[2:]}}</span>{%endfor%}</output>{%if proq.solution.suffix.strip() %}<code class="dim lang-{{proq.lang}}">{{proq.solution.suffix | e}}</code>{% endif%}</pre>
-
+            <pre class="solution">
+            {%-if proq.solution.prefix.strip() -%}
+                <code class="dim lang-{{proq.lang}}">
+                {{- proq.solution.prefix | e -}}
+                </code>
+            {%- endif -%}
+            <output style="padding-block:1rem">
+            {%- for diff in proq.solution.template_solution_diff -%}
+                <span style="background:{{diff_color[diff[:2]]}};margin-left:15px;">
+                {{- diff[2:]|e -}}
+                </span>
+            {%- endfor -%}
+            </output>
+            {%-if proq.solution.suffix.strip() -%}
+                <code class="dim lang-{{proq.lang}}">
+                {{- proq.solution.suffix | e -}}
+                </code>
+            {%- endif-%}
+            </pre>
         </div>
+        {%endif%}
     </div>
 
     {% if proq.solution.suffix_invisible%}
@@ -44,7 +90,7 @@ set diff_color = {
     <div style="display: flex; flex-direction: row; flex-wrap:wrap; gap: 20px;">
         {% for groupName, testcaseGroup in [["Public",proq.public_testcases],
         ["Private",proq.private_testcases]]%}
-        <div style="flex: content;">
+        <div class='no-break' style="flex: content;">
             <h{{depth+1}}>{{groupName}} Test Cases</h{{depth+1}}>
             <table>
                 <thead>
@@ -73,14 +119,14 @@ set diff_color = {
 {%endmacro%}
 
 {%macro render_nested_proq(nested_proq, depth=1)%}
-    {%if nested_proq.content is sequence%}
-        <h{{depth}}>{{nested_proq.title}}</h{{depth}}>
-        {%for item in nested_proq.content %}
-            {{render_nested_proq(item,depth+1)}}
-        {%endfor%}
-    {%else %}
-        {{render_proq(nested_proq.title, nested_proq.content,depth)}}
-    {%endif%}
+{%if nested_proq.content is sequence%}
+<h{{depth}}>{{nested_proq.title}}</h{{depth}}>
+{%for item in nested_proq.content %}
+{{render_nested_proq(item,depth+1)}}
+{%endfor%}
+{%else %}
+{{render_proq(nested_proq.title, nested_proq.content,depth)}}
+{%endif%}
 {%endmacro%}
 
 
@@ -90,7 +136,7 @@ set diff_color = {
 <head>
     <meta charset="UTF-8">
     <title>{{nested_proq.title}}</title>
-    
+
     <style>
         {% include "./export_style.css" %}
     </style>
