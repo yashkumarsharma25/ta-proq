@@ -72,8 +72,9 @@ class ProQ(BaseModel):
     public_testcases: list[TestCase] = Field(validation_alias="Public Test Cases")
     private_testcases: list[TestCase] = Field(validation_alias="Private Test Cases")
     solution: Solution = Field(validation_alias="Solution", description="The solution")
-
-    model_config = ConfigDict(validate_assignment=True, populate_by_name=True)
+    model_config = ConfigDict(
+        validate_assignment=True, populate_by_name=True, extra="allow"
+    )
 
     @field_validator("title")
     @classmethod
