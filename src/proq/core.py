@@ -65,6 +65,11 @@ class ProQ(BaseModel):
     """Pydantic model for a Programming Question (ProQ)."""
 
     title: str | None = Field(validation_alias="Title", description="Title")
+    tags: list[str] | None = Field(
+        default_factory=list,
+        description="List of concept tags related to the programming question.",
+    )
+
     statement: str = Field(
         validation_alias="Problem Statement",
         description="The problem statement with example and explanation",
@@ -72,6 +77,7 @@ class ProQ(BaseModel):
     public_testcases: list[TestCase] = Field(validation_alias="Public Test Cases")
     private_testcases: list[TestCase] = Field(validation_alias="Private Test Cases")
     solution: Solution = Field(validation_alias="Solution", description="The solution")
+
     model_config = ConfigDict(
         validate_assignment=True, populate_by_name=True, extra="allow"
     )
