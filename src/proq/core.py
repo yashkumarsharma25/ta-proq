@@ -6,7 +6,7 @@ from typing import Generic, TypeVar
 import yaml
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
-from md2json import dictify
+import md2json
 
 from .parse import extract_solution, extract_testcases
 from .prog_langs import ProgLang
@@ -149,7 +149,12 @@ class ProQ(BaseModel):
         )
         yaml_header, md_string = md_file.split("---", 2)[1:]
         yaml_header = yaml.safe_load(yaml_header)
-        proq = dictify(md_string)
+        proq = md2json.dictify(md_string)
+        if isinstance(proq["Problem Statement"], dict):
+            proq["Problem Statement"] = md2json.undictify(
+                proq["Problem Statement"], level=2
+            )
+
         proq["Solution"] = extract_solution(proq["Solution"])
         proq["Public Test Cases"] = extract_testcases(proq["Public Test Cases"])
         proq["Private Test Cases"] = extract_testcases(proq["Private Test Cases"])

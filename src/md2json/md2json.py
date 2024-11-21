@@ -24,3 +24,15 @@ def dictify(content):
 
     document = Markdown().parse(content)
     return nest_blocks(document.children, 1)
+
+
+def undictify(nested_dict, level=1):
+    """Converts the nested dictionary back into markdown text."""
+    markdown_text = ""
+    for heading, content in nested_dict.items():
+        markdown_text += f"{'#' * level} {heading}\n\n"
+        if isinstance(content, dict):
+            markdown_text += undictify(content, level + 1)
+        else:
+            markdown_text += f"{content}\n\n"
+    return markdown_text
