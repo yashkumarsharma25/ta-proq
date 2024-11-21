@@ -1,6 +1,5 @@
 ---
 title: Delete first three elements of a list
-lang: py3
 ---
 
 # Problem Statement
