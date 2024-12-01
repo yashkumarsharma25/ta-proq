@@ -17,13 +17,24 @@ body {
   page-break-inside: avoid;
 }
 
+h1,h2,h3,h4,h5,h6 {
+  page-break-after: avoid;
+}
 h1 {
   border-bottom: 2px solid #ccc;
   padding-bottom: 10px;
+  font-size: 2rem;
 }
 
 h2 {
   margin-top: 30px;
+  font-size: 1.6rem;
+  text-decoration: underline;
+}
+
+h3{
+  font-size: 1.4rem;
+  text-decoration: underline;
 }
 
 table {
@@ -125,5 +136,6 @@ pre {
     color: red;
     font-family: monospace;
     padding: 0.2rem;
+    font-size: larger;
   }
 }

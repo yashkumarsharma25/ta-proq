@@ -36,9 +36,11 @@ set diff_color = {
 {%macro render_proq(title, proq, depth=1)%}
 <div class="problem">
     <h{{depth}}>{{ title }}</h{{depth}}>
+    <div class="no-break">
     <p><b>{{proq.title}}</b></p>
     <div class="prob-statement">
         {{ proq.statement | gfm}}
+    </div>
     </div>
     <div style="display: flex; flex-direction: row; flex-wrap:wrap; gap: 20px;">
         {%set has_template = proq.solution.template_code.strip()%}
@@ -80,7 +82,7 @@ set diff_color = {
             {%- endif -%}
         </pre>
         </div>
-        {%if has_template%}
+        {%if has_template and not hide_template_diff%}
         <div class='no-break' style="flex: content;">
             <h{{depth+1}}>Template - Solution Diff</h{{depth+1}}>
             <pre class="solution">
@@ -121,6 +123,8 @@ set diff_color = {
         {%endif%}
     </div>
 </div>
+
+<hr style="margin: 2rem 0 1rem;">
 {%endmacro%}
 
 {%macro render_nested_proq(nested_proq, depth=1)%}

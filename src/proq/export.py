@@ -12,11 +12,10 @@ OUTPUT_FORMATS = ["json", "html", "pdf"]
 
 async def print_html_to_pdf(html_content, output_file, chrome_path=None):
     chrome_path = chrome_path or os.environ["CHROME"] or "chrome"
-    with tempfile.NamedTemporaryFile(
-        mode="w", delete_on_close=False, suffix=".html"
-    ) as f:
-        f.write(html_content)
-        f.close()
+    with tempfile.TemporaryDirectory() as tmpdir:
+        file_path = os.path.join(tmpdir, "output.html")
+        with open(file_path, "w") as f:
+            f.write(html_content)
         subprocess.run(
             [
                 chrome_path,
@@ -24,19 +23,14 @@ async def print_html_to_pdf(html_content, output_file, chrome_path=None):
                 "--headless",
                 "--disable-gpu",
                 "--no-pdf-header-footer",
-                f.name,
+                os.path.abspath(file_path),
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
 
 
-def get_rendered_html(nested_proq, show_hidden_suffix, hide_private_testcases):
-    return package_env.get_template("proq_export_template.html.jinja").render(
-        nested_proq=nested_proq,
-        show_hidden_suffix=show_hidden_suffix,
-        hide_private_testcases=hide_private_testcases,
-    )
+get_rendered_html = package_env.get_template("proq_export_template.html.jinja").render
 
 
 def proq_export(
@@ -45,6 +39,7 @@ def proq_export(
     format: Literal["html", "json", "pdf"] = "html",
     show_hidden_suffix: bool = False,
     hide_private_testcases: bool = False,
+    hide_template_diff: bool = False,
 ):
     """Export the proq_file or a nested proq config file to the given format.
 
@@ -66,6 +61,8 @@ def proq_export(
             Whether to expand hidden suffix in HTML or PDF exports.
         hide_private_testcases (bool):
             Whether to hide private testcases in HTML or PDF exports.
+        hide_template_diff (bool):
+            Whether to hide the template - solution diff.
 
     """
     if not os.path.isfile(proq_file):
@@ -88,28 +85,24 @@ def proq_export(
         nested_proq = NestedContent[ProQ](title=proq.title, content=proq)
 
     with open(output_file, "w") as f:
-        match format:
-            case "json":
-                if is_nested_proq:
-                    f.write(nested_proq.model_dump_json(indent=2))
-                else:
-                    f.write(proq.model_dump_json(indent=2))
-            case "html":
-                f.write(
-                    get_rendered_html(
-                        nested_proq,
-                        show_hidden_suffix=show_hidden_suffix,
-                        hide_private_testcases=hide_private_testcases,
-                    )
-                )
-            case "pdf":
+        if format == "json":
+            if is_nested_proq:
+                f.write(nested_proq.model_dump_json(indent=2))
+            else:
+                f.write(proq.model_dump_json(indent=2))
+        elif format in ["html", "pdf"]:
+            rendered_html = get_rendered_html(
+                nested_proq=nested_proq,
+                show_hidden_suffix=show_hidden_suffix,
+                hide_private_testcases=hide_private_testcases,
+                hide_template_diff=hide_template_diff,
+            )
+            if format == "html":
+                f.write(rendered_html)
+            if format == "pdf":
                 asyncio.run(
                     print_html_to_pdf(
-                        get_rendered_html(
-                            nested_proq,
-                            show_hidden_suffix=show_hidden_suffix,
-                            hide_private_testcases=hide_private_testcases,
-                        ),
+                        rendered_html,
                         output_file,
                     )
                 )
