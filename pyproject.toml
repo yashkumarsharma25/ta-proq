@@ -1,6 +1,6 @@
 [project]
 name = "proq"
-version = "1.0.0"
+version = "1.0.1"
 description = "A command-line based tool for authoring programming questions at scale."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -11,6 +11,7 @@ authors = [{ name = "Livin Nector", email = "livinnector2001@gmail.com" }]
 dependencies = [
   "pyyaml",
   "pydantic",
+  "fire",
   "marko",
   "Jinja2",
   "strenum>=0.4.15",
