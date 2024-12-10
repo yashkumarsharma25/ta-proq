@@ -18,6 +18,14 @@ This library defines a pydantic model for a programming question and a markdown 
 
 - **`proq`** - The main command line tool with sub-commands for creating, evaluating and exporting programming questions.
 
+### Installation
+
+To use proq as a command line the recommended way is to install it as a tool using `uv`. See [here](https://docs.astral.sh/uv/getting-started/installation/) here for instructions regarding using `uv`.
+```
+uv python install 3.12
+uv tool install git+https://github.com/livinNector/proq.git
+```
+
 ### Commands
 
 Use `proq [command] --help` to know more about the sub-command.
